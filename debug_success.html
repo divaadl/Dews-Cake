@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Success Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-pink: #f7a6b8;
+            --secondary-pink: #f28aa5;
+            --accent-pink: #be185d;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #fff8f5;
+        }
+
+        .success-page-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            perspective: 1000px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 40px;
+            padding: 60px 40px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-icon-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+        }
+
+        .success-icon-bg {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+            border-radius: 40px;
+            transform: rotate(15deg);
+        }
+
+        .success-icon {
+            position: relative;
+            z-index: 2;
+            font-size: 80px;
+            line-height: 120px;
+        }
+
+        .success-content h2 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #8b3f52;
+            margin-bottom: 15px;
+        }
+
+        .success-content p {
+            color: #6b7280;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            max-width: 450px;
+            margin-inline: auto;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 16px 32px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f7a6b8, #f28aa5);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #8b3f52;
+            border: 2px solid #fce7f3;
+        }
+
+        @media (max-width: 640px) {
+            .success-page-container {
+                padding: 20px 15px;
+            }
+
+            .glass-card {
+                padding: 40px 20px;
+                border-radius: 30px;
+            }
+
+            .success-icon-wrapper {
+                width: 100px;
+                height: 100px;
+                margin-bottom: 20px;
+            }
+
+            .success-icon {
+                font-size: 60px;
+                line-height: 100px;
+            }
+
+            .success-content h2 { 
+                font-size: 24px; 
+            }
+            
+            .success-content p { 
+                font-size: 14px; 
+                margin-bottom: 30px;
+            }
+
+            .nav-actions {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .btn-action {
+                width: 100%;
+                box-sizing: border-box;
+                justify-content: center;
+                padding: 14px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="success-page-container">
+    <div class="glass-card">
+        <div class="success-icon-wrapper">
+            <div class="success-icon-bg"></div>
+            <div class="success-icon">🎉</div>
+        </div>
+
+        <div class="success-content">
+            <h2>Yay, Pesanan Berhasil!</h2>
+            <p>
+                Terima kasih sudah memesan di <strong>Dew's Cake</strong>. 🍰<br>
+                Data pesanan Anda sudah kami simpan. Kami akan segera memproses kelezatan pesanan Anda setelah pembayaran terkonfirmasi.
+            </p>
+        </div>
+
+        <div class="nav-actions">
+            <a href="#" class="btn-action btn-secondary">
+                <i class="fa-solid fa-receipt"></i> Lihat Pesanan
+            </a>
+            <a href="#" class="btn-action btn-primary">
+                <i class="fa-solid fa-house"></i> Ke Beranda
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
