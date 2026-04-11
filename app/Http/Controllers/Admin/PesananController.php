@@ -59,6 +59,42 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::findOrFail($id);
 
+        // Fitur Refund: Admin membatalkan pesanan yang sudah dibayar
+        if ($request->status === 'refund') {
+            // Syarat: Status pesanan harus sudah dibayar tapi belum sampai tahap produksi selesai/pengiriman
+            $paidStatuses = ['dp_dibayar', 'lunas', 'diproses'];
+            if (!in_array($pesanan->status_pesanan, $paidStatuses)) {
+                $errorMsg = 'Gagal Refund: ';
+                if (in_array($pesanan->status_pesanan, ['siap_diambil', 'siap_dikirim'])) {
+                    $errorMsg .= 'Pesanan sudah siap/dalam tahap pengiriman, tidak dapat di-refund.';
+                } else {
+                    $errorMsg .= 'Hanya pesanan yang sudah dibayar (DP/Lunas) yang dapat di-refund.';
+                }
+                return redirect()->back()->with('error', $errorMsg);
+            }
+
+            // Syarat tambahan: Belum ada data pengiriman aktif (untuk keamanan tambahan)
+            $isShipped = \App\Models\Pengiriman::where('pesanan_id', $id)->exists();
+            if ($isShipped) {
+                return redirect()->back()->with('error', 'Pesanan sudah masuk proses pengiriman, tidak dapat di-refund.');
+            }
+
+            \DB::transaction(function() use ($pesanan) {
+                // Update status pesanan jadi refund
+                $pesanan->update(['status_pesanan' => 'refund']);
+                
+                // Update status pembayaran jadi refund
+                \App\Models\Pembayaran::where('pesanan_id', $pesanan->pesanan_id)
+                    ->where('status_pembayaran', 'berhasil')
+                    ->update(['status_pembayaran' => 'refund']);
+            });
+
+            $msg = "*Pesanan Dibatalkan & Refund* 💸\n\nHalo {$pesanan->user->name}, pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " Anda telah dibatalkan oleh Admin dan status pembayaran dialokasikan untuk REFUND.\n\nSilakan hubungi Admin untuk proses pengembalian dana. Terima kasih!";
+            $this->fonnteService->sendMessage($pesanan->phone_pesanan, $msg);
+
+            return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan dan status pembayaran menjadi refund.');
+        }
+
         // Cegah pengembalian status jika pesanan sudah masuk tahap pembayaran/proses
         $advancedStatuses = ['lunas', 'diproses', 'siap_diambil', 'siap_dikirim', 'selesai'];
         $reversalStatuses = ['menunggu_pembayaran', 'dp_dibayar'];

@@ -155,6 +155,7 @@
     .status-berhasil { background: #dcfce7; color: #15803d; }
     .status-menunggu { background: #fef3c7; color: #92400e; }
     .status-gagal { background: #fee2e2; color: #b91c1c; }
+    .status-refund { background: #ffedd5; color: #9a3412; }
 
     .type-badge {
         font-size: 10px;
@@ -402,6 +403,7 @@
                     <option value="berhasil" {{ request('status') == 'berhasil' ? 'selected' : '' }}>✅ Berhasil</option>
                     <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>⏳ Menunggu</option>
                     <option value="gagal" {{ request('status') == 'gagal' ? 'selected' : '' }}>❌ Gagal</option>
+                    <option value="refund" {{ request('status') == 'refund' ? 'selected' : '' }}>💸 Refund</option>
                 </select>
             </div>
  
@@ -485,7 +487,13 @@
                         </td>
                         <td data-label="Status">
                             @php
-                                $statusClass = 'status-' . ($pb->status_pembayaran == 'berhasil' ? 'berhasil' : ($pb->status_pembayaran == 'menunggu' ? 'menunggu' : 'gagal'));
+                                $statusMap = [
+                                    'berhasil' => 'berhasil',
+                                    'menunggu' => 'menunggu',
+                                    'batal' => 'gagal',
+                                    'refund' => 'refund'
+                                ];
+                                $statusClass = 'status-' . ($statusMap[$pb->status_pembayaran] ?? 'gagal');
                             @endphp
                             <span class="status-badge {{ $statusClass }}">
                                 {{ $pb->status_pembayaran }}

@@ -421,6 +421,7 @@
                     <option value="siap_diambil" {{ request('status') == 'siap_diambil' ? 'selected' : '' }}>🎂 Siap Diambil</option>
                     <option value="siap_dikirim" {{ request('status') == 'siap_dikirim' ? 'selected' : '' }}>🚚 Siap Dikirim</option>
                     <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>🏁 Selesai</option>
+                    <option value="refund" {{ request('status') == 'refund' ? 'selected' : '' }}>💸 Refund</option>
                     <option value="batal" {{ request('status') == 'batal' ? 'selected' : '' }}>❌ Batal</option>
                 </select>
             </div>
@@ -491,6 +492,8 @@
                                 <span class="badge" style="background:#f3f4f6; color:#1f2937; border: 1px solid #d1d5db; font-size: 11px;">SELESAI</span>
                             @elseif($p->status_pesanan == 'batal')
                                 <span class="badge" style="background:#fee2e2; color:#b91c1c; font-size: 11px;">BATAL</span>
+                            @elseif($p->status_pesanan == 'refund')
+                                <span class="badge" style="background:#ffedd5; color:#9a3412; font-size: 11px;">REFUND</span>
                             @else
                                 @php
                                     $firstPayment = $p->pembayaran->sortBy('pembayaran_id')->first();
@@ -535,14 +538,31 @@
                                 <button type="button" class="btn-action btn-detail" onclick="showOrderDetail({{ $p->pesanan_id }})" title="Detail Pesanan">
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                 </button>
-                                @if($p->status_pesanan != 'batal' && $p->status_pesanan != 'selesai')
-                                    <form id="cancel-form-{{ $p->pesanan_id }}" action="{{ route('admin.pesanan.updateStatus', $p->pesanan_id) }}" method="POST" style="margin: 0;">
-                                        @csrf
-                                        <input type="hidden" name="status" value="batal">
-                                        <button type="button" class="btn-action btn-cancel" onclick="confirmCancel({{ $p->pesanan_id }})" title="Batalkan Pesanan">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </form>
+                                @if(!in_array($p->status_pesanan, ['batal', 'selesai', 'refund']))
+                                    @php
+                                        // Refund hanya untuk pesanan yang sudah bayar tapi belum masuk tahap 'Siap'
+                                        $isRefundable = in_array($p->status_pesanan, ['dp_dibayar', 'lunas', 'diproses']);
+                                        // Cancel hanya untuk pesanan yang belum bayar sama sekali
+                                        $isCancellable = ($p->status_pesanan == 'menunggu_pembayaran');
+                                    @endphp
+
+                                    @if($isRefundable)
+                                        <form id="refund-form-{{ $p->pesanan_id }}" action="{{ route('admin.pesanan.updateStatus', $p->pesanan_id) }}" method="POST" style="margin: 0;">
+                                            @csrf
+                                            <input type="hidden" name="status" value="refund">
+                                            <button type="button" class="btn-action" style="background: #f59e0b;" onclick="confirmRefund({{ $p->pesanan_id }})" title="Refund & Batalkan">
+                                                <i class="fa-solid fa-money-bill-transfer"></i>
+                                            </button>
+                                        </form>
+                                    @elseif($isCancellable)
+                                        <form id="cancel-form-{{ $p->pesanan_id }}" action="{{ route('admin.pesanan.updateStatus', $p->pesanan_id) }}" method="POST" style="margin: 0;">
+                                            @csrf
+                                            <input type="hidden" name="status" value="batal">
+                                            <button type="button" class="btn-action btn-cancel" onclick="confirmCancel({{ $p->pesanan_id }})" title="Batalkan Pesanan">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 @endif
                             </div>
 
@@ -704,6 +724,23 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 document.getElementById('cancel-form-' + id).submit();
+            }
+        });
+    }
+
+    function confirmRefund(id) {
+        PremiumConfirm.fire({
+            title: 'Refund & Batalkan?',
+            text: "Pesanan ini sudah dibayar. Membatalkannya akan mengubah status pembayaran menjadi REFUND. Anda harus mengembalikan dana secara manual kepada pelanggan.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            confirmButtonText: 'Ya, Refund & Batal!',
+            cancelButtonText: 'Jangan Dulu',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('refund-form-' + id).submit();
             }
         });
     }

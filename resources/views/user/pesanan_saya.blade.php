@@ -87,6 +87,7 @@
 .status-siap { background: #f0fdf4; color: #15803d; border: 1px solid #166534; }
 .status-selesai { background: #f3f4f6; color: #1f2937; border: 1px solid #d1d5db; }
 .status-batal { background: #fecaca; color: #991b1b; }
+.status-refund { background: #ffedd5; color: #9a3412; }
 
 .btn-pelunasan {
     display: block;
@@ -226,6 +227,7 @@
                     elseif($p->status_pesanan == 'siap_dikirim') { $statusClass = 'status-siap'; $statusText = 'Pesanan Siap Dikirim'; }
                     elseif($p->status_pesanan == 'selesai') { $statusClass = 'status-selesai'; $statusText = 'Pesanan Selesai'; }
                     elseif($p->status_pesanan == 'batal') { $statusClass = 'status-batal'; $statusText = 'Dibatalkan'; }
+                    elseif($p->status_pesanan == 'refund') { $statusClass = 'status-refund'; $statusText = 'Dana Dikembalikan (Refund)'; }
                 @endphp
                 <div class="status-badge {{ $statusClass }}">
                     {{ $statusText }}
