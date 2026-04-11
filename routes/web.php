@@ -13,8 +13,15 @@ use App\Http\Controllers\PesananController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentCallbackController;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
-Route::get('/cron', function () {
+Route::get('/cron', function (\Illuminate\Http\Request $request) {
+    if ($request->key !== 'DewsCakeSecret2024') {
+        Log::warning('Unauthorized Cron Attempt from IP: ' . $request->ip());
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+    
+    Log::info('External Cron Triggered from IP: ' . $request->ip());
     Artisan::call('schedule:run');
     return 'Cron berhasil dijalankan';
 });
