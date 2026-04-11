@@ -12,6 +12,12 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentCallbackController;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/cron', function () {
+    Artisan::call('schedule:run');
+    return 'Cron berhasil dijalankan';
+});
 
 /*USER (PUBLIC)*/
 Route::get('/', function () {
