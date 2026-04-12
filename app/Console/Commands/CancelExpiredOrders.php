@@ -26,9 +26,13 @@ class CancelExpiredOrders extends Command
      */
     public function handle()
     {
-        Log::info('Memulai pengecekan pesanan kadaluarsa via Scheduler (fallback)...');
-
-        $expiredTime = now()->subHours(24);
+        $now = now();
+        $expiredTime = $now->copy()->subHours(24);
+        
+        Log::info('--- Pencadangan Otomatis Pesanan Kadaluarsa ---');
+        Log::info('Waktu Sistem Saat Ini: ' . $now);
+        Log::info('Zona Waktu: ' . config('app.timezone'));
+        Log::info('Batas Waktu Kadaluarsa (24 jam yang lalu): ' . $expiredTime);
 
         $expiredOrders = \App\Models\Pesanan::where('status_pesanan', 'menunggu_pembayaran')
             ->where('tanggal_pesan', '<', $expiredTime)
@@ -39,9 +43,10 @@ class CancelExpiredOrders extends Command
         $failCount = 0;
 
         if ($count > 0) {
-            Log::info("Ditemukan {$count} pesanan kadaluarsa di sistem.");
+            Log::info("Ditemukan {$count} pesanan yang berpotensi kadaluarsa.");
             
             foreach ($expiredOrders as $order) {
+                Log::info("Memproses Pesanan #{$order->pesanan_id} (Dibuat: {$order->tanggal_pesan})");
                 try {
                     \DB::transaction(function () use ($order) {
                         $order->update([
@@ -56,18 +61,18 @@ class CancelExpiredOrders extends Command
                             ]);
                     });
 
-                    Log::info("Berhasil membatalkan pesanan #{$order->pesanan_id} via Scheduler.");
+                    Log::info("BERHASIL membatalkan pesanan #{$order->pesanan_id}.");
                     $successCount++;
                 } catch (\Exception $e) {
-                    Log::error("Gagal membatalkan pesanan #{$order->pesanan_id}. Error: " . $e->getMessage());
+                    Log::error("GAGAL membatalkan pesanan #{$order->pesanan_id}. Error: " . $e->getMessage());
                     $failCount++;
                 }
             }
 
-            Log::info("Selesai memproses pembatalan via Scheduler. Berhasil: {$successCount}, Gagal: {$failCount}.");
+            Log::info("Ringkasan: Berhasil: {$successCount}, Gagal: {$failCount}.");
             $this->info("Berhasil membatalkan {$successCount} pesanan, {$failCount} gagal.");
         } else {
-            Log::info('Tidak ada pesanan kadaluarsa yang ditemukan oleh Scheduler.');
+            Log::info('Tidak ditemukan pesanan yang kadaluarsa.');
             $this->info('Tidak ada pesanan kadaluarsa.');
         }
     }

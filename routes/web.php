@@ -16,14 +16,35 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 
 Route::get('/cron', function (\Illuminate\Http\Request $request) {
+    Log::info('Cron Attempt - IP: ' . $request->ip() . ' - Params: ' . json_encode($request->all()));
+
     if ($request->key !== 'DewsCakeSecret2024') {
         Log::warning('Unauthorized Cron Attempt from IP: ' . $request->ip());
-        return response()->json(['message' => 'Unauthorized'], 403);
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Unauthorized key.'
+        ], 403);
     }
     
-    Log::info('External Cron Triggered from IP: ' . $request->ip());
-    Artisan::call('schedule:run');
-    return 'Cron berhasil dijalankan';
+    Log::info('External Cron Triggered - Beginning Schedule Execution');
+    
+    try {
+        Artisan::call('schedule:run');
+        $output = Artisan::output();
+        Log::info('Schedule Run Output: ' . $output);
+        
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Cron berhasil dijalankan',
+            'output' => $output
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Cron Execution Error: ' . $e->getMessage());
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
 });
 
 /*USER (PUBLIC)*/
