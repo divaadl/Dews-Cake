@@ -29,13 +29,14 @@ Route::get('/cron', function (\Illuminate\Http\Request $request) {
     Log::info('External Cron Triggered - Beginning Schedule Execution');
     
     try {
-        Artisan::call('schedule:run');
+        Log::info('Executing orders:cancel-expired command directly...');
+        Artisan::call('orders:cancel-expired');
         $output = Artisan::output();
-        Log::info('Schedule Run Output: ' . $output);
+        Log::info('Command Output: ' . $output);
         
         return response()->json([
             'status' => 'success',
-            'message' => 'Cron berhasil dijalankan',
+            'message' => 'Command orders:cancel-expired berhasil dijalankan',
             'output' => $output
         ]);
     } catch (\Exception $e) {
