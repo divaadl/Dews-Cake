@@ -154,6 +154,9 @@ class PesananController extends Controller
         }
 
         if ($request->status === 'batal') {
+            \App\Models\Pembayaran::where('pesanan_id', $id)
+                ->where('status_pembayaran', 'menunggu')
+                ->update(['status_pembayaran' => 'batal']);
             return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan.');
         }
 

@@ -808,13 +808,10 @@ class PesananController extends Controller
             'status_pesanan' => 'batal'
         ]);
 
-        // Update payment status if exists
-        $pembayaran = Pembayaran::where('pesanan_id', $pesanan->pesanan_id)->first();
-        if ($pembayaran) {
-            $pembayaran->update([
-                'status_pembayaran' => 'batal'
-            ]);
-        }
+        // Update status pembayaran jika ada yang masih menunggu
+        \App\Models\Pembayaran::where('pesanan_id', $pesanan->pesanan_id)
+            ->where('status_pembayaran', 'menunggu')
+            ->update(['status_pembayaran' => 'batal']);
 
         return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan.');
     }

@@ -36,6 +36,9 @@ class CancelExpiredOrders extends Command
 
         $expiredOrders = \App\Models\Pesanan::where('status_pesanan', 'menunggu_pembayaran')
             ->where('tanggal_pesan', '<', $expiredTime)
+            ->whereDoesntHave('pembayaran', function ($query) {
+                $query->where('metode_pembayaran', 'cash');
+            })
             ->get();
 
         $count = $expiredOrders->count();

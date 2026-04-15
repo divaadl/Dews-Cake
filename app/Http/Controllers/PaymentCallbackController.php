@@ -92,8 +92,10 @@ class PaymentCallbackController extends Controller
             } else if ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
                 
                 \DB::transaction(function () use ($pembayaran, $pesanan, $transactionStatus) {
-                    // Update status pembayaran menjadi batal
-                    $pembayaran->update(['status_pembayaran' => 'batal']);
+                    // Update semuapembayaran yang masih 'menunggu' untuk pesanan ini menjadi 'batal'
+                    \App\Models\Pembayaran::where('pesanan_id', $pesanan->pesanan_id)
+                        ->where('status_pembayaran', 'menunggu')
+                        ->update(['status_pembayaran' => 'batal']);
                     
                     // Update status pesanan menjadi batal
                     $pesanan->update(['status_pesanan' => 'batal']);
