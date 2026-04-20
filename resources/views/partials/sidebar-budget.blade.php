@@ -21,7 +21,7 @@
     pointer-events: none;
     transform: translateX(100%);
 
-    will-change: transform;
+    will-change: transform, opacity;
     transition: transform 0.5s cubic-bezier(.22,1,.36,1),
                 opacity 0.3s ease,
                 visibility 0.5s;
@@ -30,15 +30,34 @@
 @media (max-width: 480px) {
     .budget-sidebar {
         width: 100%;
+        height: auto;
+        max-height: 70vh; /* Mengcover 70% layar agar menu di belakang tetap terlihat */
+        top: auto;
+        bottom: 0;
         border-left: none;
+        border-top: 2px solid #fce7f3;
+        border-radius: 24px 24px 0 0;
+        transform: translateY(100%); /* Slide dari bawah di HP */
+        box-shadow: 0 -10px 40px rgba(190, 24, 93, 0.15);
     }
 }
 
 .budget-sidebar.active {
-    transform: translateX(0);
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+}
+
+@media (min-width: 481px) {
+    .budget-sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 480px) {
+    .budget-sidebar.active {
+        transform: translateY(0);
+    }
 }
 
 .budget-sidebar h3 {
@@ -114,6 +133,19 @@
 
 #pesanan-saya td {
     border-top: 1px solid #f3f4f6;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 480px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
 }
 
 .budget-sidebar::-webkit-scrollbar {
@@ -218,8 +250,10 @@
 .pesanan-table-wrapper {
     max-height: 260px;
     overflow-y: auto;
+    overflow-x: auto;
     margin-top: 10px;
     border-radius: 12px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .pesanan-table {
@@ -300,14 +334,36 @@
 /* SIDEBAR HEADER & CONTENT */
 .sidebar-header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    padding: 24px 20px 20px;
+    padding: 12px 20px 20px;
     background: #fff;
     position: sticky;
     top: 0;
     z-index: 20;
     border-bottom: 1px solid #fdf2f8;
+}
+
+.sheet-handle {
+    display: none;
+    width: 40px;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 99px;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 480px) {
+    .sheet-handle {
+        display: block;
+    }
+}
+
+.sidebar-header-content {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .sidebar-header h3 {
@@ -368,7 +424,10 @@
 <div id="budget-sidebar" class="budget-sidebar">
 
     <div class="sidebar-header">
-        <h3>🎂 Atur Budget Paket</h3>
+        <div class="sheet-handle"></div>
+        <div class="sidebar-header-content">
+            <h3>🎂 Atur Budget Paket</h3>
+        </div>
     </div>
 
     <div class="sidebar-body">
