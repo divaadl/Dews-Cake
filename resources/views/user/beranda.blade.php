@@ -415,28 +415,78 @@
             font-weight: 500;
         }
 
+        .feature-wrap {
+            position: relative;
+            z-index: 1;
+        }
+
         .feature-image.landscape {
             width: 100%;
             max-width: 560px;
-            aspect-ratio: 16 / 10;
-            border-radius: 28px;
+            /* Hapus aspect-ratio tetap agar tidak memotong gambar */
+            border-radius: 60px 20px 60px 20px;
             overflow: hidden;
             background: #fff;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+            position: relative;
+            box-shadow: 
+                0 20px 50px rgba(247, 166, 184, 0.35),
+                0 10px 20px rgba(0, 0, 0, 0.05);
             display: flex;
             align-items: center;
             justify-content: center;
+            border: 8px solid #fff;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: floatImage 6s ease-in-out infinite;
+        }
+
+        @keyframes floatImage {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(1deg); }
+        }
+
+        .feature-image.landscape::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            border: 2px solid rgba(247, 166, 184, 0.1);
+            pointer-events: none;
+            z-index: 2;
         }
 
         .feature-image.landscape img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: 0.4s ease;
+            height: auto; /* Biar tinggi menyesuaikan */
+            max-height: 400px;
+            object-fit: contain; /* Memastikan seluruh gambar terlihat */
+            transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fff;
+        }
+
+        .feature-image.landscape:hover {
+            box-shadow: 
+                0 30px 70px rgba(247, 166, 184, 0.5),
+                0 15px 30px rgba(0, 0, 0, 0.08);
+            transform: scale(1.02);
         }
 
         .feature-image.landscape:hover img {
-            transform: scale(1.04);
+            transform: scale(1.05);
+        }
+
+        .feature-wrap::before {
+            content: '✨';
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 30px;
+            z-index: 5;
+            animation: sparkle 3s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.5; transform: scale(0.8) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(15deg); }
         }
 
         /* BALIK POSISI UNTUK LOKASI */
@@ -784,8 +834,10 @@
             </a>
         </div>
 
-        <div class="feature-image landscape">
-            <img src="{{ asset('storage/produk/Bolu.jpeg') }}" alt="Bolu Kukus Dew's Cake">
+        <div class="feature-wrap">
+            <div class="feature-image landscape">
+                <img src="{{ asset('storage/produk/Bolu.jpeg') }}" alt="Bolu Kukus Dew's Cake">
+            </div>
         </div>
 
     </div>
@@ -794,8 +846,10 @@
 <section class="section-feature">
     <div class="container feature-box feature-reverse">
 
-        <div class="feature-image landscape">
-            <img src="/images/antar-roti.jpg" alt="Lokasi Pengambilan Dew’s Cake">
+        <div class="feature-wrap">
+            <div class="feature-image landscape">
+                <img src="/images/antar-roti.jpg" alt="Lokasi Pengambilan Dew’s Cake">
+            </div>
         </div>
 
         <div class="feature-text">
