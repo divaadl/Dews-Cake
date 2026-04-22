@@ -785,7 +785,7 @@
         </div>
 
         <div class="feature-image landscape">
-            <img src="{{ asset('storage/produk/Bolu.jpg') }}" alt="Bolu Kukus Dew's Cake">
+            <img src="{{ asset('storage/produk/Bolu.jpeg') }}" alt="Bolu Kukus Dew's Cake">
         </div>
 
     </div>
