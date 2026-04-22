@@ -70,6 +70,24 @@ class PesananController extends Controller
     {
         $cart = session('cart', []);
 
+        // Ambil ID produk yang ada di cart untuk meminimalkan query
+        $productIds = collect($cart)
+            ->whereIn('type', ['produk', 'rekomendasi'])
+            ->pluck('id')
+            ->unique();
+        
+        $weights = Produk::whereIn('produk_id', $productIds)->pluck('berat', 'produk_id');
+
+        // Tambahkan berat ke setiap item di cart
+        foreach ($cart as &$item) {
+            if (in_array(($item['type'] ?? ''), ['produk', 'rekomendasi'])) {
+                $item['berat'] = $weights[$item['id']] ?? 80; // default 80 if not found
+            } else {
+                $item['berat'] = 0;
+            }
+        }
+        unset($item);
+
         // cari paket dari cart
         $paketDipilih = null;
 

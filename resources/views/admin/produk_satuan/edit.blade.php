@@ -187,6 +187,14 @@
             </div>
 
             <div class="form-group">
+                <label>Berat Produk (gram)</label>
+                <input type="number"
+                       name="berat"
+                       value="{{ $produk->berat }}"
+                       required>
+            </div>
+
+            <div class="form-group">
                 <label>Deskripsi</label>
                 <textarea name="deskripsi">{{ $produk->deskripsi }}</textarea>
             </div>

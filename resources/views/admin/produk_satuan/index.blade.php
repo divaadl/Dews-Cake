@@ -175,6 +175,7 @@
                 <th>Nama Produk</th>
                 <th>Kategori</th>
                 <th>Harga</th>
+                <th>Berat</th>
                 <th>Status</th>
                 <th>Aksi</th>
             </tr>
@@ -203,7 +204,7 @@
                 </td>
 
                 <td>Rp {{ number_format($item->harga) }}</td>
-
+                <td>{{ $item->berat }} gr</td>
                 <td>
                     <form action="/admin/produk-satuan/{{ $item->produk_id }}/status" method="POST">
                         @csrf

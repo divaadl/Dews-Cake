@@ -196,6 +196,12 @@
             </div>
 
             <div class="form-group">
+                <label>Berat Produk (gram)</label>
+                <input type="number" name="berat" value="80" required>
+                <small style="color: #64748b; font-size: 12px; font-style: italic;">*Berat default 80 gram</small>
+            </div>
+
+            <div class="form-group">
                 <label>Deskripsi</label>
                 <textarea name="deskripsi"></textarea>
             </div>

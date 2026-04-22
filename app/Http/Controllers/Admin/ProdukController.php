@@ -45,6 +45,7 @@ class ProdukController extends Controller
             'nama_produk'  => $request->nama_produk,
             'kategori_id'  => $request->kategori_id,
             'harga'        => $request->harga,
+            'berat'        => $request->berat,
             'deskripsi'    => $request->deskripsi,
             'gambar'       => $namaGambar,
             'status'       => $request->status
@@ -70,6 +71,7 @@ class ProdukController extends Controller
         $data = [
             'nama_produk' => $request->nama_produk,
             'harga'       => $request->harga,
+            'berat'       => $request->berat,
             'deskripsi'   => $request->deskripsi,
             'kategori_id' => $request->kategori_id,
             'status'      => $request->status

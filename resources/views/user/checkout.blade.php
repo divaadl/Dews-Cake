@@ -1259,8 +1259,32 @@ document.addEventListener('DOMContentLoaded', function () {
     // Call API Cek Ongkir
     function checkOngkir(destination, courier) {
         
-        // Asumsikan berat default 1000 gram jika tidak ada berat dinamik per produk
-        const weight = 1000; 
+        // --- HITUNG BERAT DINAMIS ---
+        let totalBerat = 0;
+        const cartItems = @json($cart);
+        
+        cartItems.forEach(item => {
+            if (item.type === 'produk' || item.type === 'rekomendasi') {
+                totalBerat += (item.qty * (item.berat || 80));
+            }
+        });
+
+        // Tambahkan estimasi berat kemasan (box)
+        // Misal 1 box = 150 gram
+        const elementKardus = document.getElementById('biaya-wadah-label');
+        if (elementKardus) {
+            const match = elementKardus.innerText.match(/(\d+)\sbox/);
+            if (match && match[1]) {
+                const jumlahBox = parseInt(match[1]);
+                totalBerat += (jumlahBox * 150); // 150gr per box
+            }
+        }
+
+        // Pastikan minimal berat ke kurir adalah 1000gr (1kg) jika hasil hitungan kecil
+        // Tapi kirim berat asli jika lebih berat
+        const finalWeight = Math.max(totalBerat, 1000); 
+
+        if (ongkirTextBox) ongkirTextBox.innerText = 'Menghitung (' + (finalWeight/1000).toFixed(1) + ' kg)...';
 
         fetch('{{ route("cek.ongkir") }}', {
             method: 'POST',
@@ -1270,7 +1294,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify({
                 destination: destination,
-                weight: weight,
+                weight: finalWeight,
                 courier: courier
             })
         })
