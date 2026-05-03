@@ -715,7 +715,7 @@
 
             <p style="margin-top:14px;">
                 Pemesanan dilakukan
-                <strong>paling lambat H-5</strong>
+                <strong>paling lambat H-3</strong>
                 sebelum tanggal pengambilan atau acara,
                 agar proses produksi dapat berjalan maksimal.
             </p>
@@ -736,7 +736,7 @@
             </div>
 
             <div class="preorder-note">
-                ⏳ Batas pemesanan maksimal H-5 sebelum kue diambil / acara berlangsung
+                ⏳ Batas pemesanan maksimal H-3 sebelum kue diambil / acara berlangsung
             </div>
 
         </div>
@@ -780,7 +780,7 @@
                 <div class="order-title">Proses Preorder</div>
                 <div class="order-desc">
                     Pesanan dibuat fresh dari awal
-                    sesuai jadwal preorder (H-5).
+                    sesuai jadwal preorder (H-3).
                 </div>
             </div>
 
