@@ -1493,23 +1493,8 @@
                             }
                         }
 
-                        function renderRowPaket(item = null) {
-
-                            if (!paketAktif) return '';
-
-                            const mode =
-                                document.querySelector('input[name="mode_pesan"]:checked')?.value;
-
-                            const harga =
-                                mode === 'manual' ?
-                                paketAktif.harga_manual :
-                                paketAktif.harga_rekomendasi;
-
-                            const qty = paketAktif.qty;
-                            const subtotal = harga * qty;
-
-                            // Tidak menampilkan identitas paket dalam TR per permintaan user
-                            return ``;
+                        function renderRowPaket(biayaWadahTotal = 0) {
+                            return ''; // Dihapus sesuai permintaan (hanya produk saja)
                         }
 
                         function renderPesananDariRekomendasi() {
@@ -1523,22 +1508,19 @@
                             const listPesanan = document.getElementById("list-pesanan");
                             listPesanan.innerHTML = "";
 
-                            let hargaPaket = 0;
+                            let hargaProdukOnly = 0;
 
                             rekomendasiItems.forEach(item => {
-                                hargaPaket += item.qty * item.harga;
+                                hargaProdukOnly += item.qty * item.harga;
                             });
 
-                            // 🔥 harga 1 paket
-                            paketAktif.harga_rekomendasi = hargaPaket;
+                            // 🔥 harga 1 paket (Hanya Produk)
+                            paketAktif.harga_rekomendasi = hargaProdukOnly;
 
-                            // 🔥 total akhir
-                            let total = paketAktif.harga_rekomendasi * paketAktif.qty;
+                            // 🔥 total produk (rekomendasi)
+                            let totalFinal = paketAktif.harga_rekomendasi * paketAktif.qty;
 
-                            // render row paket
-                            listPesanan.insertAdjacentHTML("beforeend", renderRowPaket());
-
-                            // render detail produk (TANPA tambah total lagi)
+                            // render detail produk
                             rekomendasiItems.forEach(item => {
 
                                 const qtyTotal = item.qty * paketAktif.qty;
@@ -1547,7 +1529,7 @@
                                 listPesanan.insertAdjacentHTML("beforeend", `
             <tr>
                 <td>${item.nama}</td>
-                <td>${qtyTotal}</td>
+                <td style="text-align:center">${qtyTotal}</td>
                 <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
                 <td>Rp ${subtotal.toLocaleString('id-ID')}</td>
                 <td><textarea placeholder="Catatan..."></textarea></td>
@@ -1556,7 +1538,7 @@
                             });
 
                             document.getElementById("total-pesanan").innerText =
-                                "Rp " + total.toLocaleString('id-ID');
+                                "Rp " + totalFinal.toLocaleString('id-ID');
 
                             document.getElementById("pesanan-saya").style.display = "block";
                             document.getElementById("hasil-rekomendasi").style.display = "block";
@@ -1697,19 +1679,20 @@
                                 1 :
                                 paketAktif.qty_per_jenis;
 
-                            let hargaPaket = 0;
+                            let hargaProdukOnly = 0;
 
                             checked.forEach(item => {
                                 const harga = parseInt(item.dataset.harga);
-                                hargaPaket += harga * qtyPerJenis;
+                                hargaProdukOnly += harga * qtyPerJenis;
                             });
 
-                            paketAktif.harga_manual = hargaPaket;
+                            // 🔥 Harga 1 Paket (Hanya Produk)
+                            paketAktif.harga_manual = hargaProdukOnly;
 
-                            const total = paketAktif.harga_manual * paketAktif.qty;
+                            const totalFinal = paketAktif.harga_manual * paketAktif.qty;
 
                             document.getElementById("total-pesanan").innerText =
-                                "Rp " + total.toLocaleString('id-ID');
+                                "Rp " + totalFinal.toLocaleString('id-ID');
 
                             toggleCheckoutButton();
                         }

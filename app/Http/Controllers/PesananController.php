@@ -272,12 +272,14 @@ class PesananController extends Controller
         $paket = Paket::with('detail.produk')
             ->findOrFail($paketId);
 
-        // Validasi range budget
+        // Validasi range budget - Dihapus agar user bisa input bebas
+        /*
         if ($budget < $paket->minimal_budget || $budget > $paket->maksimal_budget) {
             return response()->json([
                 'info' => 'Budget di luar range paket.'
             ], 200);
         }
+        */
 
         // Hitung jumlah jenis
         if ($paket->jenis_paket == 'kotak') {
@@ -311,11 +313,10 @@ class PesananController extends Controller
                 $finalTotal = $currentTotal + $biayaWadahTotal;
 
                 if (
-                    $finalTotal >= $paket->minimal_budget &&
-                    $finalTotal <= $budget &&
-                    $finalTotal > $bestTotal
+                    $currentTotal <= $budget &&
+                    $currentTotal > $bestTotal
                 ) {
-                    $bestTotal = $finalTotal;
+                    $bestTotal = $currentTotal;
                     $bestCombination = $currentItems;
                 }
 
