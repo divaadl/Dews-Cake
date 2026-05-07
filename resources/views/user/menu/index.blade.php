@@ -718,12 +718,12 @@
         @if ($tab == 'paket')
             <div class="paket-info">
                 <h3>Paket Custom Sesuai Budget 🎉</h3>
-                <p>Paket di <strong>Dew’s Cake</strong>bersifat <strong>custom sesuai budget</strong>🎂<br>
+                <p>Paket di <strong>Dew’s Cake</strong> bersifat <strong>custom sesuai budget</strong>🎂<br>
                     Kamu cukup menentukan kisaran budget yang diinginkan, lalu sistem kami akan menampilkan
                     <strong>rekomendasi pilihan kue</strong> dengan harga yang sesuai dengan budget tersebut.
                 </p>
                 <p style="margin-top:12px">👉 Selanjutnya, kamu bebas <strong>memilih kue dari rekomendasi yang
-                        diberikan</strong>sesuai selera sebelum melanjutkan pemesanan. </p>
+                        diberikan</strong> sesuai selera sebelum melanjutkan pemesanan. </p>
             </div>
             <div id="info-paket" class="info-paket" style="display:none;">
                 ℹ️ Anda hanya bisa memilih <strong>satu jenis paket</strong>. Kosongkan paket yang dipilih untuk mengganti
