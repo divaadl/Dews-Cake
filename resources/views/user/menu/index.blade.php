@@ -883,6 +883,16 @@
                                 return;
                             }
 
+                            const infoRekom = document.getElementById("info-rekomendasi");
+                            if (budget > paketAktif.max || budget < paketAktif.min) {
+                                infoRekom.innerHTML = "ℹ️ Budget yang kamu masukkan belum dapat dikombinasikan dengan paket ini. Coba sesuaikan budget";
+                                infoRekom.style.display = "block";
+                                document.getElementById("hasil-rekomendasi").style.display = "none";
+                                return;
+                            }
+
+
+
                             fetch("{{ route('paket.rekomendasi.ajax') }}", {
                                     method: "POST",
                                     headers: {
@@ -908,11 +918,12 @@
                                 .then(data => {
 
                                     if (!data.items || data.items.length === 0) {
-                                        document.getElementById("info-rekomendasi").style.display = "block";
+                                        infoRekom.innerHTML = "ℹ️ Budget yang kamu masukkan belum dapat dikombinasikan dengan paket ini. Coba sesuaikan budget atau jumlah paket.";
+                                        infoRekom.style.display = "block";
                                         return;
                                     }
 
-                                    document.getElementById("info-rekomendasi").style.display = "none";
+                                    infoRekom.style.display = "none";
 
                                     // 🔥 SIMPAN HASIL
                                     rekomendasiItems = data.items;
