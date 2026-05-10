@@ -516,7 +516,7 @@
                                         @csrf
                                         <select name="status" onchange="this.form.submit()" class="status-select" 
                                             style="background: {{ $colors[0] }}; color: {{ $colors[1] }}; border-color: transparent;">
-                                            <option value="menunggu_pembayaran" {{ $p->status_pesanan == 'menunggu_pembayaran' ? 'selected' : '' }}>⏳ Menunggu Bayar</option>
+                                            <option value="menunggu_pembayaran" {{ $p->status_pesanan == 'menunggu_pembayaran' ? 'selected' : '' }}>⏳ Menunggu Pembayaran</option>
                                             <option value="dp_dibayar" {{ $p->status_pesanan == 'dp_dibayar' ? 'selected' : '' }}>💸 DP Dibayar</option>
                                             <option value="lunas" {{ $p->status_pesanan == 'lunas' ? 'selected' : '' }}>💰 Lunas</option>
                                             <option value="diproses" {{ $p->status_pesanan == 'diproses' ? 'selected' : '' }}>🥣 Diproses</option>
