@@ -414,7 +414,7 @@
                 <label for="status"><i class="fa-solid fa-filter"></i> Status Pesanan</label>
                 <select name="status" id="status" class="filter-input">
                     <option value="">Semua Status</option>
-                    <option value="menunggu_pembayaran" {{ request('status') == 'menunggu_pembayaran' ? 'selected' : '' }}>⏳ Menunggu Bayar</option>
+                    <option value="menunggu_pembayaran" {{ request('status') == 'menunggu_pembayaran' ? 'selected' : '' }}>⏳ Menunggu Pembayaran</option>
                     <option value="dp_dibayar" {{ request('status') == 'dp_dibayar' ? 'selected' : '' }}>💸 DP Dibayar</option>
                     <option value="lunas" {{ request('status') == 'lunas' ? 'selected' : '' }}>💰 Lunas</option>
                     <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>🥣 Diproses</option>
