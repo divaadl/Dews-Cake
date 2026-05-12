@@ -52,6 +52,16 @@
             max-width: 1100px;
             margin: 60px auto;
             padding: 0 20px;
+            transition: all 0.5s cubic-bezier(.22,1,.36,1);
+        }
+
+        /* Geser konten jika sidebar aktif di Desktop */
+        @media (min-width: 1025px) {
+            body.sidebar-open .menu-wrapper {
+                margin-right: 440px;
+                max-width: calc(100% - 480px);
+                margin-left: 40px;
+            }
         }
 
         .menu-title {
@@ -1286,6 +1296,7 @@
                                 }
 
                                 sidebar.classList.add('active');
+                                document.body.classList.add('sidebar-open');
                                 updateManualCount();
                                 toggleCheckoutButton();
 
@@ -1298,6 +1309,7 @@
                                 lockOtherPaket(null);
                                 infoPaket.style.display = "none";
                                 sidebar.classList.remove('active');
+                                document.body.classList.remove('sidebar-open');
                             }
 
                             if (rekomendasiItems.length > 0) {
@@ -1494,8 +1506,10 @@
 
                             if (qty > 0) {
                                 sidebar.classList.add("active");
+                                document.body.classList.add('sidebar-open');
                             } else {
                                 sidebar.classList.remove("active");
+                                document.body.classList.remove('sidebar-open');
 
                                 // reset isi sidebar jika qty 0
                                 document.getElementById("sidebar-budget-form").style.display = "none";
