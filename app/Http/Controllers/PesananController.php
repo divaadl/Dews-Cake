@@ -578,16 +578,9 @@ class PesananController extends Controller
         $alamatLengkap = $checkout['alamat'];
         
         if ($request->metode_pengambilan == 'kirim') {
-            $provName = ''; $cityName = ''; $distName = '';
-            
-            // Get names from Komerce APIs
-            $provResponse = Http::withHeaders(['key' => env('RAJAONGKIR_KEY')])->get(env('RAJAONGKIR_URL').'/destination/province')->json('data');
-            $cityResponse = Http::withHeaders(['key' => env('RAJAONGKIR_KEY')])->get(env('RAJAONGKIR_URL').'/destination/city/'.$request->provinsi)->json('data');
-            $distResponse = Http::withHeaders(['key' => env('RAJAONGKIR_KEY')])->get(env('RAJAONGKIR_URL').'/destination/district/'.$request->kota)->json('data');
-            
-            if(is_array($provResponse)) { $p = collect($provResponse)->firstWhere('id', $request->provinsi); $provName = $p['name'] ?? ''; }
-            if(is_array($cityResponse)) { $c = collect($cityResponse)->firstWhere('id', $request->kota); $cityName = $c['name'] ?? ''; }
-            if(is_array($distResponse)) { $d = collect($distResponse)->firstWhere('id', $request->kecamatan); $distName = $d['name'] ?? ''; }
+            $provName = $request->province_name ?? '';
+            $cityName = $request->city_name ?? '';
+            $distName = $request->district_name ?? '';
             
             $alamatLengkap = $request->alamat_lengkap . ', Kec. ' . $distName . ', ' . $cityName . ', Prov. ' . $provName;
         }

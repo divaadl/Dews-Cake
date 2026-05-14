@@ -717,6 +717,7 @@
                 <i class="fa-solid fa-clock" style="font-size: 24px; color: var(--primary);"></i>
                 <p style="margin:0; font-size: 14px; color: var(--primary); font-weight: 500;">
                     ⏰ Pesanan minimal dibuat <strong>H-3 sebelum tanggal pengambilan</strong>.<br>
+                    📅 Pemesanan dapat dilakukan maksimal untuk <strong>jadwal pengambilan 3 bulan ke depan</strong>.<br>
                     🕒 Jam Operasional Pengambilan:<br>
                     • Senin - Jumat: <strong>08:00 - 20:00 WIB</strong><br>
                     • Sabtu - Minggu: <strong>09:00 - 21:00 WIB</strong>
@@ -855,57 +856,68 @@
             </div>
 
             <div id="box-ongkir" style="display:none; margin-top:15px;">
-                <div style="margin-bottom: 12px;">
-                    <label>Provinsi</label>
-                    <select id="provinsi" name="provinsi">
-                        <option value="">Pilih Provinsi</option>
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 12px;">
-                    <label>Kota/Kabupaten</label>
-                    <select id="kota" name="kota" disabled>
-                        <option value="">Pilih Kota/Kabupaten</option>
-                    </select>
-                </div>
+                @if(auth()->user()->province_id && auth()->user()->city_id && auth()->user()->district_id)
+                    <div style="background: #fdf2f4; padding: 20px; border-radius: 18px; border: 1px solid #fce7f3; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #8b3f52; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Alamat Pengiriman Saya</h4>
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            <div style="background: #fff; padding: 10px; border-radius: 12px; color: #d45c7a; box-shadow: 0 4px 10px rgba(212,92,122,0.1);">
+                                <i class="fa-solid fa-map-location-dot" style="font-size: 20px;"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <p style="margin: 0; font-size: 14px; color: #1e293b; line-height: 1.6; font-weight: 500;">
+                                    <strong>{{ auth()->user()->name }}</strong> ({{ auth()->user()->phone }})<br>
+                                    {{ auth()->user()->address }}<br>
+                                    <span style="font-size: 13px; color: #64748b; font-weight: 500;">
+                                        {{ auth()->user()->district_name ? auth()->user()->district_name . ', ' : '' }}
+                                        {{ auth()->user()->city_name ? auth()->user()->city_name . ', ' : '' }}
+                                        {{ auth()->user()->province_name ? auth()->user()->province_name : '' }}
+                                    </span>
+                                </p>
+                                <a href="{{ route('akun.edit') }}" style="display: inline-block; margin-top: 10px; font-size: 12px; color: #d45c7a; font-weight: 600; text-decoration: none; border-bottom: 1.5px solid rgba(212,92,122,0.3); padding-bottom: 2px; transition: 0.3s;">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit Alamat di Profil
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
-                <div style="margin-bottom: 12px;">
-                    <label>Kecamatan</label>
-                    <select id="kecamatan" name="kecamatan" disabled>
-                        <option value="">Pilih Kecamatan</option>
-                    </select>
-                </div>
+                    {{-- Hidden inputs to keep the existing JS logic working --}}
+                    <input type="hidden" id="provinsi" name="provinsi" value="{{ auth()->user()->province_id }}">
+                    <input type="hidden" id="kota" name="kota" value="{{ auth()->user()->city_id }}">
+                    <input type="hidden" id="kecamatan" name="kecamatan" value="{{ auth()->user()->district_id }}">
+                    <input type="hidden" name="province_name" value="{{ auth()->user()->province_name }}">
+                    <input type="hidden" name="city_name" value="{{ auth()->user()->city_name }}">
+                    <input type="hidden" name="district_name" value="{{ auth()->user()->district_name }}">
+                    <input type="hidden" name="alamat_lengkap" value="{{ auth()->user()->address }}">
 
-                <div style="margin-bottom: 16px;">
-                    <label>Alamat Lengkap (Jalan, No Rumah, RT/RW)</label>
-                    <textarea 
-                        name="alamat_lengkap" 
-                        id="alamat_lengkap" 
-                        rows="3" 
-                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"
-                        placeholder="Contoh: Jl. Sudirman No 10, RT 01/RW 02, Patokan samping minimarket"
-                    ></textarea>
-                </div>
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #8b3f52; margin-bottom: 8px;">Pilih Kurir</label>
+                        <select id="kurir" name="kurir" class="form-control" style="width: 100%; padding: 14px; border-radius: 16px; border: 1.5px solid #f3c2cd; background: #fff; appearance: none; cursor: pointer;">
+                            <option value="">Pilih Kurir</option>
+                            <option value="jne" {{ auth()->user()->preferred_courier == 'jne' ? 'selected' : '' }}>JNE (Reguler)</option>
+                            <option value="pos" {{ auth()->user()->preferred_courier == 'pos' ? 'selected' : '' }}>POS Indonesia</option>
+                            <option value="tiki" {{ auth()->user()->preferred_courier == 'tiki' ? 'selected' : '' }}>TIKI</option>
+                        </select>
+                    </div>
 
-                <div style="margin-bottom: 16px;">
-                    <label>Kurir</label>
-                    <select id="kurir" name="kurir" disabled>
-                        <option value="">Pilih Kurir</option>
-                        <option value="jne">JNE</option>
-                        <option value="pos">POS Indonesia</option>
-                        <option value="tiki">TIKI</option>
-                    </select>
-                </div>
-
-                <label>Ongkos Kirim</label>
-                <input
-                    type="hidden"
-                    name="ongkir"
-                    id="ongkir"
-                    value="0"
-                >
-                <span id="ongkir-text-box" style="display: block; margin-top: 8px; font-size: 18px; font-weight: bold; color: #be185d;">Rp 0</span>
-
+                    <div style="background: #fff; padding: 15px; border-radius: 16px; border: 1.5px solid #fce7f3; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 14px; color: #64748b; font-weight: 500;">Estimasi Ongkos Kirim:</span>
+                        <span id="ongkir-text-box" style="font-size: 18px; font-weight: 800; color: #be185d;">Rp 0</span>
+                    </div>
+                    <input type="hidden" name="ongkir" id="ongkir" value="0">
+                @else
+                    <div style="background: #fff1f2; padding: 30px; border-radius: 24px; border: 1px solid #fecaca; text-align: center; box-shadow: 0 10px 25px rgba(239,68,68,0.05);">
+                        <div style="background: #fee2e2; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: #ef4444;">
+                            <i class="fa-solid fa-location-dot" style="font-size: 24px;"></i>
+                        </div>
+                        <h4 style="margin: 0 0 8px 0; color: #991b1b; font-size: 16px; font-weight: 700;">Alamat Belum Lengkap</h4>
+                        <p style="margin: 0 0 20px 0; font-size: 13px; color: #b91c1c; line-height: 1.5;">
+                            Anda perlu melengkapi data provinsi, kota, dan kecamatan di profil untuk menghitung ongkos kirim.
+                        </p>
+                        <a href="{{ route('akun.edit') }}" class="btn-submit" style="display: block; padding: 14px; border-radius: 16px; background: linear-gradient(135deg, #f7a6b8, #f28aa5); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 8px 20px rgba(242, 138, 165, 0.3);">
+                            <i class="fa-solid fa-user-gear" style="margin-right: 8px;"></i> Lengkapi Profil Sekarang
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -1098,11 +1110,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     ongkirBox.style.display = 'block';
                     document.getElementById('box-toko').style.display = 'none';
 
-                    // Removed validation for alamat_pesanan because it was deleted
-
-                    // Load provinces if not loaded yet
-                    if (propinsiSelect.options.length <= 1) {
+                    // If it's a select element, load provinces
+                    if (propinsiSelect && propinsiSelect.tagName === 'SELECT' && propinsiSelect.options.length <= 1) {
                         fetchProvinces();
+                    }
+
+                    // If we have values and kurir, trigger cekOngkir
+                    if (kurirSelect && kurirSelect.value) {
+                        checkOngkir(kecamatanSelect.value, kurirSelect.value);
                     }
 
                 } else {
@@ -1110,20 +1125,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('box-toko').style.display = 'block';
                     ongkirInput.value = 0;
                     
-                    // Reset dropdowns
-                    propinsiSelect.value = '';
-                    kotaSelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-                    kotaSelect.disabled = true;
-                    kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                    kecamatanSelect.disabled = true;
-                    kurirSelect.value = '';
-                    kurirSelect.disabled = true;
+                    // Reset dropdowns if they exist
+                    if (propinsiSelect && propinsiSelect.tagName === 'SELECT') {
+                        propinsiSelect.value = '';
+                        kotaSelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
+                        kotaSelect.disabled = true;
+                        kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                        kecamatanSelect.disabled = true;
+                        kurirSelect.value = '';
+                        kurirSelect.disabled = true;
+                    }
                     
                     updateTotal();
                 }
-
             });
         });
+
+    // Trigger on load for existing selection
+    const checkedRadio = document.querySelector('input[name="metode_pengambilan"]:checked');
+    if (checkedRadio) {
+        checkedRadio.dispatchEvent(new Event('change'));
+    }
 
     // Fetch Provinces
     function fetchProvinces() {

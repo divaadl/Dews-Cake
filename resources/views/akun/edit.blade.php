@@ -234,16 +234,136 @@
                 </div>
             </div>
 
-            {{-- ALAMAT --}}
+            {{-- ALAMAT DETAIL --}}
             <div class="form-group">
-                <label>Alamat Pengiriman Utama</label>
+                <label>Alamat Lengkap (Jalan, No Rumah, RT/RW)</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-location-dot" style="top: 20px; transform: none;"></i>
-                    <textarea name="address" rows="4" class="form-control" 
-                              placeholder="Masukkan alamat lengkap serta detail (misal: warna pagar)"
+                    <textarea name="address" rows="3" class="form-control" 
+                              placeholder="Contoh: Jl. Sudirman No 10, RT 01/RW 02, Patokan samping minimarket"
                               required>{{ old('address', $user->address) }}</textarea>
                 </div>
             </div>
+
+            {{-- RAJAONGKIR FIELDS --}}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label>Provinsi</label>
+                    <select id="province_id" name="province_id" class="form-control" style="padding-left: 15px;">
+                        <option value="">Pilih Provinsi</option>
+                    </select>
+                    <input type="hidden" id="province_name" name="province_name" value="{{ $user->province_name }}">
+                </div>
+                <div class="form-group">
+                    <label>Kota/Kabupaten</label>
+                    <select id="city_id" name="city_id" class="form-control" style="padding-left: 15px;" disabled>
+                        <option value="">Pilih Kota/Kabupaten</option>
+                    </select>
+                    <input type="hidden" id="city_name" name="city_name" value="{{ $user->city_name }}">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label>Kecamatan</label>
+                    <select id="district_id" name="district_id" class="form-control" style="padding-left: 15px;" disabled>
+                        <option value="">Pilih Kecamatan</option>
+                    </select>
+                    <input type="hidden" id="district_name" name="district_name" value="{{ $user->district_name }}">
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const provinceSelect = document.getElementById('province_id');
+                    const citySelect = document.getElementById('city_id');
+                    const districtSelect = document.getElementById('district_id');
+
+                    const provinceNameInput = document.getElementById('province_name');
+                    const cityNameInput = document.getElementById('city_name');
+                    const districtNameInput = document.getElementById('district_name');
+
+                    const userProv = "{{ $user->province_id }}";
+                    const userCity = "{{ $user->city_id }}";
+                    const userDist = "{{ $user->district_id }}";
+
+                    // Load Provinces
+                    fetch('{{ route("api.provinces") }}')
+                        .then(res => res.json())
+                        .then(data => {
+                            data.forEach(p => {
+                                const opt = document.createElement('option');
+                                opt.value = p.id;
+                                opt.textContent = p.name;
+                                if(p.id == userProv) opt.selected = true;
+                                provinceSelect.appendChild(opt);
+                            });
+                            if(userProv) provinceSelect.dispatchEvent(new Event('change'));
+                        });
+
+                    provinceSelect.addEventListener('change', function() {
+                        const provId = this.value;
+                        const provName = this.options[this.selectedIndex].text;
+                        provinceNameInput.value = provId ? provName : '';
+
+                        citySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
+                        citySelect.disabled = true;
+                        districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                        districtSelect.disabled = true;
+                        
+                        cityNameInput.value = '';
+                        districtNameInput.value = '';
+
+                        if (provId) {
+                            fetch(`/api/cities/${provId}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    citySelect.disabled = false;
+                                    data.forEach(c => {
+                                        const opt = document.createElement('option');
+                                        opt.value = c.id;
+                                        opt.textContent = c.name;
+                                        if(c.id == userCity) opt.selected = true;
+                                        citySelect.appendChild(opt);
+                                    });
+                                    if(userCity) citySelect.dispatchEvent(new Event('change'));
+                                });
+                        }
+                    });
+
+                    citySelect.addEventListener('change', function() {
+                        const cityId = this.value;
+                        const cityName = this.options[this.selectedIndex].text;
+                        cityNameInput.value = cityId ? cityName : '';
+
+                        districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                        districtSelect.disabled = true;
+                        districtNameInput.value = '';
+
+                        if (cityId) {
+                            fetch(`/api/districts/${cityId}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    districtSelect.disabled = false;
+                                    data.forEach(d => {
+                                        const opt = document.createElement('option');
+                                        opt.value = d.id;
+                                        opt.textContent = d.name;
+                                        if(d.id == userDist) opt.selected = true;
+                                        districtSelect.appendChild(opt);
+                                    });
+                                    if(userDist) districtSelect.dispatchEvent(new Event('change'));
+                                });
+                        }
+                    });
+
+                    districtSelect.addEventListener('change', function() {
+                        const distId = this.value;
+                        const distName = this.options[this.selectedIndex].text;
+                        districtNameInput.value = distId ? distName : '';
+                    });
+                });
+            </script>
 
             {{-- BUTTONS --}}
             <div class="action-buttons">

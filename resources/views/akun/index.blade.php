@@ -217,7 +217,18 @@
                     </div>
                     <div class="info-content">
                         <span class="info-label">Alamat Pengiriman</span>
-                        <div class="info-value">{{ $user->address ?: 'Belum diisi' }}</div>
+                        <div class="info-value">
+                            @if($user->address)
+                                {{ $user->address }}<br>
+                                <span style="font-size: 13px; color: #6b7280; font-weight: 500;">
+                                    {{ $user->district_name ? $user->district_name . ', ' : '' }}
+                                    {{ $user->city_name ? $user->city_name . ', ' : '' }}
+                                    {{ $user->province_name ? $user->province_name : '' }}
+                                </span>
+                            @else
+                                Belum diisi
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

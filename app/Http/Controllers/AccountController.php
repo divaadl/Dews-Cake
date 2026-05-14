@@ -25,16 +25,28 @@ class AccountController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'name'    => 'required|string|max:255',
-            'phone'   => 'required|string|min:10|max:15',
-            'address' => 'required|string',
+            'name'          => 'required|string|max:255',
+            'phone'         => 'required|string|min:10|max:15',
+            'address'       => 'required|string',
+            'province_id'   => 'nullable|string',
+            'city_id'       => 'nullable|string',
+            'district_id'   => 'nullable|string',
+            'province_name' => 'nullable|string',
+            'city_name'     => 'nullable|string',
+            'district_name' => 'nullable|string',
         ]);
 
         $user = Auth::user();
         $user->update([
-            'name'    => $request->name,
-            'phone'   => $request->phone,
-            'address' => $request->address,
+            'name'          => $request->name,
+            'phone'         => $request->phone,
+            'address'       => $request->address,
+            'province_id'   => $request->province_id,
+            'city_id'       => $request->city_id,
+            'district_id'   => $request->district_id,
+            'province_name' => $request->province_name,
+            'city_name'     => $request->city_name,
+            'district_name' => $request->district_name,
         ]);
 
         return redirect()
