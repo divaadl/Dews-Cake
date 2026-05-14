@@ -46,12 +46,15 @@ class RemindPaymentPelunasan extends Command
 
         foreach ($orders as $order) {
             $orderIdFormatted = '#ORD-' . str_pad($order->pesanan_id, 5, '0', STR_PAD_LEFT);
-            $deadline = \Carbon\Carbon::parse($order->tanggal_pengambilan)->subDays(2)->format('d/m/Y');
+            $tglAmbil = \Carbon\Carbon::parse($order->tanggal_pengambilan)->format('d/m/Y');
+            $tglDeadline = \Carbon\Carbon::parse($order->tanggal_pengambilan)->subDays(2)->format('d/m/Y');
             
             $message = "*Pengingat Pelunasan Pesanan* 🍰\n\n" .
                        "Halo *{$order->user->name}*,\n\n" .
-                       "Ini adalah pengingat untuk pesanan Anda *{$orderIdFormatted}*.\n" .
-                       "Batas waktu pelunasan adalah *besok* (H-2 sebelum pengambilan, tanggal {$deadline}).\n\n" .
+                       "Ini adalah pengingat untuk pesanan Anda *{$orderIdFormatted}*.\n\n" .
+                       "*Detail Jadwal:*\n" .
+                       "📅 Tgl Pengambilan: *{$tglAmbil}*\n" .
+                       "⏳ Batas Pelunasan (H-2): *Besok ({$tglDeadline})*\n\n" .
                        "Mohon segera lakukan pelunasan agar pesanan dapat kami proses tepat waktu. Jika tidak dilunasi hingga besok, pesanan akan dibatalkan otomatis dan DP hangus sesuai ketentuan.\n\n" .
                        "Silakan cek menu *Pesanan Saya* di website untuk melakukan pelunasan online.\n\n" .
                        "Terima kasih! 🙏\n_Dews Cake_";

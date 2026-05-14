@@ -673,6 +673,9 @@ class PesananController extends Controller
 
         // ================= KIRIM NOTIFIKASI WHATSAPP =================
         $isH3 = false;
+        $tglAmbil = $pesanan->tanggal_pengambilan ? $pesanan->tanggal_pengambilan->format('d/m/Y') : '-';
+        $tglDeadline = $pesanan->tanggal_pengambilan ? $pesanan->tanggal_pengambilan->copy()->subDays(2)->format('d/m/Y') : '-';
+
         if ($pesanan->tanggal_pengambilan) {
             $diff = now()->diffInDays($pesanan->tanggal_pengambilan, false);
             if ($diff <= 3) $isH3 = true;
@@ -682,15 +685,15 @@ class PesananController extends Controller
         if ($pembayaran->metode_pembayaran != 'cash') {
             if ($pembayaran->jenis_pembayaran == 'dp') {
                 if ($isH3) {
-                    $expirationWarning = "\n\n*⚠️ PENTING (Pesanan Mepet):*\n" .
+                    $expirationWarning = "\n\n*Detail Jadwal:*\n📅 Tgl Pengambilan: *{$tglAmbil}*\n\n*⚠️ PENTING (Pesanan Mepet):*\n" .
                                        "Karena pemesanan dilakukan dalam waktu yang mepet (H-3), maka *pelunasan wajib dilakukan segera* setelah pembayaran DP untuk memastikan proses produksi dapat berjalan. Jika tidak dilunasi tepat waktu, pesanan akan dibatalkan otomatis dan DP hangus.";
                 } else {
-                    $expirationWarning = "\n\n*Ketentuan Pembayaran DP:*\n" .
-                                       "• Pembayaran DP wajib dilakukan maksimal 24 jam setelah pemesanan. Jika tidak melakukan pembayaran, pesanan akan otomatis dibatalkan.\n" .
-                                       "• Pelunasan wajib dilakukan maksimal *H-2 sebelum tanggal pengambilan*. Jika hingga batas waktu tersebut pelunasan belum dilakukan, pesanan akan dibatalkan dan DP yang telah dibayarkan tidak dapat dikembalikan (hangus).";
+                    $expirationWarning = "\n\n*Detail Jadwal:*\n📅 Tgl Pengambilan: *{$tglAmbil}*\n⏳ Batas Pelunasan (H-2): *{$tglDeadline}*\n\n*Ketentuan Pembayaran DP:*\n" .
+                                       "• Pembayaran DP wajib dilakukan maksimal 24 jam setelah pemesanan.\n" .
+                                       "• Pelunasan wajib dilakukan maksimal *H-2 sebelum tanggal pengambilan*. Jika hingga batas waktu tersebut pelunasan belum dilakukan, pesanan akan dibatalkan dan DP hangus.";
                 }
             } else {
-                $expirationWarning = "\n\n*Penting:* Pesanan akan otomatis dibatalkan jika tidak dibayar dalam waktu *24 jam*.";
+                $expirationWarning = "\n\n*Detail Jadwal:*\n📅 Tgl Pengambilan: *{$tglAmbil}*\n\n*Penting:* Pesanan akan otomatis dibatalkan jika tidak dibayar dalam waktu *24 jam*.";
             }
         }
 

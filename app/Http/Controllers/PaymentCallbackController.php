@@ -81,15 +81,18 @@ class PaymentCallbackController extends Controller
                         $pesanan->update(['status_pesanan' => 'dp_dibayar']);
                         
                         $isH3 = false;
+                        $tglAmbil = $pesanan->tanggal_pengambilan ? $pesanan->tanggal_pengambilan->format('d/m/Y') : '-';
+                        $tglDeadline = $pesanan->tanggal_pengambilan ? $pesanan->tanggal_pengambilan->copy()->subDays(2)->format('d/m/Y') : '-';
+
                         if ($pesanan->tanggal_pengambilan) {
                             $diff = now()->diffInDays($pesanan->tanggal_pengambilan, false);
                             if ($diff <= 3) $isH3 = true;
                         }
 
                         if ($isH3) {
-                            $msg = "*Pembayaran DP Berhasil!* ✅\n\nHalo {$pesanan->user->name}, pembayaran DP untuk pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " telah kami terima.\n\n*⚠️ PENTING:* Karena jadwal pengambilan sudah sangat dekat, mohon lakukan *pelunasan segera* agar kami dapat langsung memproses produksi pesanan Anda. Terima kasih!";
+                            $msg = "*Pembayaran DP Berhasil!* ✅\n\nHalo {$pesanan->user->name}, pembayaran DP untuk pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " telah kami terima.\n\n*Detail Jadwal:*\n📅 Tgl Pengambilan: *{$tglAmbil}*\n\n*⚠️ PENTING:* Karena jadwal pengambilan sudah sangat dekat, mohon lakukan *pelunasan segera* agar kami dapat langsung memproses produksi pesanan Anda. Terima kasih!";
                         } else {
-                            $msg = "*Pembayaran DP Berhasil!* ✅\n\nHalo {$pesanan->user->name}, pembayaran DP untuk pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " telah kami terima.\n\n*Penting:* Mohon lakukan pelunasan maksimal *H-2 sebelum tanggal pengambilan*. Jika tidak dilunasi tepat waktu, pesanan akan dibatalkan secara otomatis. Terima kasih!";
+                            $msg = "*Pembayaran DP Berhasil!* ✅\n\nHalo {$pesanan->user->name}, pembayaran DP untuk pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " telah kami terima.\n\n*Detail Jadwal:*\n📅 Tgl Pengambilan: *{$tglAmbil}*\n⏳ Batas Pelunasan (H-2): *{$tglDeadline}*\n\n*Penting:* Mohon lakukan pelunasan maksimal H-2. Jika tidak dilunasi tepat waktu, pesanan akan dibatalkan secara otomatis. Terima kasih!";
                         }
                     } else {
                         $pesanan->update(['status_pesanan' => 'lunas']);
