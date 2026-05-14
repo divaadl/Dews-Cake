@@ -673,6 +673,24 @@
         <p>Lengkapi detail pesanan sebelum konfirmasi 🎂</p>
     </div>
 
+    {{-- Notifikasi Data Profil Belum Lengkap --}}
+    @if(!auth()->user()->phone || !auth()->user()->address || !auth()->user()->province_id || !auth()->user()->city_id || !auth()->user()->district_id)
+    <div style="background: #fffbeb; border: 1px solid #fef3c7; padding: 25px; border-radius: 24px; margin-bottom: 35px; display: flex; gap: 20px; align-items: center; box-shadow: 0 10px 25px rgba(146, 64, 14, 0.05);">
+        <div style="background: #fef3c7; width: 54px; height: 54px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: #92400e; flex-shrink: 0;">
+            <i class="fa-solid fa-circle-exclamation" style="font-size: 28px;"></i>
+        </div>
+        <div style="flex: 1;">
+            <h4 style="margin: 0 0 4px 0; color: #92400e; font-size: 16px; font-weight: 700;">Data Profil Anda Belum Lengkap</h4>
+            <p style="margin: 0; font-size: 14px; color: #b45309; line-height: 1.5; font-weight: 500;">
+                Kami mendeteksi <strong>Nomor WhatsApp</strong> atau <strong>Alamat Lengkap</strong> Anda belum diisi. Mohon lengkapi data tersebut di menu profil agar kami dapat menghubungi Anda dan memproses pengiriman dengan lancar.
+            </p>
+            <a href="{{ route('akun.edit') }}" style="display: inline-block; margin-top: 10px; background: #92400e; color: #fff; padding: 8px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; text-decoration: none; transition: 0.3s; box-shadow: 0 4px 12px rgba(146, 64, 14, 0.2);">
+                <i class="fa-solid fa-user-pen" style="margin-right: 6px;"></i> Lengkapi Data Profil Sekarang
+            </a>
+        </div>
+    </div>
+    @endif
+
 
     <form method="POST" action="{{ route('pesanan.konfirmasi') }}">
         <input type="hidden" name="cart_data" id="checkout-cart-data">
