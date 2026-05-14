@@ -672,9 +672,28 @@ class PesananController extends Controller
         session()->forget(['cart', 'checkout_data']);
 
         // ================= KIRIM NOTIFIKASI WHATSAPP =================
-        $expirationWarning = $pembayaran->metode_pembayaran != 'cash' 
-            ? "\n\n*Penting:* Pesanan akan otomatis dibatalkan jika tidak dibayar dalam waktu *24 jam*." 
-            : "";
+        $isH3 = false;
+        if ($pesanan->tanggal_pengambilan) {
+            $diff = now()->diffInDays($pesanan->tanggal_pengambilan, false);
+            if ($diff <= 3) $isH3 = true;
+        }
+
+        $expirationWarning = "";
+        if ($pembayaran->metode_pembayaran != 'cash') {
+            if ($pembayaran->jenis_pembayaran == 'dp') {
+                if ($isH3) {
+                    $expirationWarning = "\n\n*⚠️ PENTING (Pesanan Mepet):*\n" .
+                                       "Karena pemesanan dilakukan dalam waktu yang mepet (H-3), maka *pelunasan wajib dilakukan segera* setelah pembayaran DP untuk memastikan proses produksi dapat berjalan. Jika tidak dilunasi tepat waktu, pesanan akan dibatalkan otomatis dan DP hangus.";
+                } else {
+                    $expirationWarning = "\n\n*Ketentuan Pembayaran DP:*\n" .
+                                       "• Pembayaran DP wajib dilakukan maksimal 24 jam setelah pemesanan. Jika tidak melakukan pembayaran, pesanan akan otomatis dibatalkan.\n" .
+                                       "• Pelunasan wajib dilakukan maksimal *H-2 sebelum tanggal pengambilan*. Jika hingga batas waktu tersebut pelunasan belum dilakukan, pesanan akan dibatalkan dan DP yang telah dibayarkan tidak dapat dikembalikan (hangus).";
+                }
+            } else {
+                $expirationWarning = "\n\n*Penting:* Pesanan akan otomatis dibatalkan jika tidak dibayar dalam waktu *24 jam*.";
+            }
+        }
+
         $customerMessage = "*Hallo {$pesanan->user->name}*,\n\nTerima kasih telah memesan di *Dews Cake*! 🎂\n\n*Detail Pesanan:*\nID Pesanan: #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . "\nTotal Pembayaran: Rp " . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . "\n\nSilakan selesaikan pembayaran Anda agar pesanan dapat segera kami proses.{$expirationWarning}\n\n_Pesan otomatis dari Dews Cake_";
         
         $adminMessage = "*Notifikasi Pesanan Baru* 🚨\n\nAda pesanan masuk dengan ID #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . "\nPelanggan: {$pesanan->user->name}\nTotal: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n\nSegera cek dashboard admin untuk proses lebih lanjut.";

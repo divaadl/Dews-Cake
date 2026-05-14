@@ -79,7 +79,18 @@ class PaymentCallbackController extends Controller
 
                     if ($pembayaran->jenis_pembayaran == 'dp') {
                         $pesanan->update(['status_pesanan' => 'dp_dibayar']);
-                        $msg = "*Pembayaran DP Berhasil!* ✅\n\nHalo {$pesanan->user->name}, pembayaran DP untuk pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " telah kami terima.\n\nStatus pesanan Anda sekarang sedang kami proses. Terima kasih!";
+                        
+                        $isH3 = false;
+                        if ($pesanan->tanggal_pengambilan) {
+                            $diff = now()->diffInDays($pesanan->tanggal_pengambilan, false);
+                            if ($diff <= 3) $isH3 = true;
+                        }
+
+                        if ($isH3) {
+                            $msg = "*Pembayaran DP Berhasil!* ✅\n\nHalo {$pesanan->user->name}, pembayaran DP untuk pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " telah kami terima.\n\n*⚠️ PENTING:* Karena jadwal pengambilan sudah sangat dekat, mohon lakukan *pelunasan segera* agar kami dapat langsung memproses produksi pesanan Anda. Terima kasih!";
+                        } else {
+                            $msg = "*Pembayaran DP Berhasil!* ✅\n\nHalo {$pesanan->user->name}, pembayaran DP untuk pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " telah kami terima.\n\n*Penting:* Mohon lakukan pelunasan maksimal *H-2 sebelum tanggal pengambilan*. Jika tidak dilunasi tepat waktu, pesanan akan dibatalkan secara otomatis. Terima kasih!";
+                        }
                     } else {
                         $pesanan->update(['status_pesanan' => 'lunas']);
                         $msg = "*Pembayaran Lunas!* ✅\n\nHalo {$pesanan->user->name}, pembayaran untuk pesanan #ORD-" . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT) . " telah kami terima dan berstatus LUNAS.\n\nStatus pesanan Anda sekarang sedang kami proses. Terima kasih!";

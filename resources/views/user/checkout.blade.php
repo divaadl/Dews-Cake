@@ -717,6 +717,7 @@
                 <i class="fa-solid fa-clock" style="font-size: 24px; color: var(--primary);"></i>
                 <p style="margin:0; font-size: 14px; color: var(--primary); font-weight: 500;">
                     ⏰ Pesanan minimal dibuat <strong>H-3 sebelum tanggal pengambilan</strong>.<br>
+                    💳 Pembayaran DP wajib dilunasi maksimal <strong>H-2 sebelum tanggal pengambilan</strong>.<br>
                     📅 Pemesanan dapat dilakukan maksimal untuk <strong>jadwal pengambilan 3 bulan ke depan</strong>.<br>
                     🕒 Jam Operasional Pengambilan:<br>
                     • Senin - Jumat: <strong>08:00 - 20:00 WIB</strong><br>
@@ -1531,7 +1532,12 @@ function updateTotal() {
 
 // Tambahkan Listener untuk pilihan DP/Lunas
 const rbs = document.querySelectorAll('input[name="jenis_pembayaran"]');
-rbs.forEach(rb => rb.addEventListener('change', updateTotal));
+
+rbs.forEach(rb => {
+    rb.addEventListener('change', function() {
+        updateTotal();
+    });
+});
 
 // JS for Cash vs Online
 const rbsMetode = document.querySelectorAll('input[name="metode_pembayaran_pilihan"]');
