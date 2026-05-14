@@ -1392,7 +1392,7 @@ document.querySelectorAll('.produk-checkbox').forEach(cb => {
                 </td>
                 <td>${qty}</td>
                 <td>Rp ${harga.toLocaleString('id-ID')}</td>
-                <td>Rp ${subtotal.toLocaleString('id-ID')}</td>
+                <td id="subtotal-${id}">Rp ${subtotal.toLocaleString('id-ID')}</td>
                 <td>
                     <div class="catatan-box">
                         <span class="catatan-icon">📝</span>
@@ -1484,25 +1484,32 @@ function updateTotal() {
     const ongkirVal = document.getElementById('ongkir');
     const ongkir = ongkirVal ? parseInt(ongkirVal.value) || 0 : 0;
 
-    // totalAktif is products + packaging
-    let currentTotal = backendTotal + initialBiayaWadah;
-    
-    // Grand Total
-    const grandTotal = currentTotal + ongkir;
+    // 1. Hitung Total Produk dari tabel (agar sinkron dengan apa yang dilihat user)
+    let produkTotal = 0;
+    document.querySelectorAll('[id^="subtotal-"]').forEach(el => {
+        const val = parseInt(el.innerText.replace(/[^0-9]/g, '')) || 0;
+        produkTotal += val;
+    });
 
-    // 1. Update Total Produk Murni
+    // 2. Ambil Biaya Wadah yang sedang tampil
+    const wadahValText = document.getElementById('biaya-wadah-val');
+    let wadahTotal = 0;
+    if (wadahValText && wadahValText.parentElement.style.display !== 'none') {
+        wadahTotal = parseInt(wadahValText.innerText.replace(/[^0-9]/g, '')) || 0;
+    }
+    
+    // 3. Grand Total
+    const grandTotal = produkTotal + wadahTotal + ongkir;
+
+    // --- UPDATE UI ---
+    
+    // Total Produk
     const produkMurniText = document.getElementById('total-produk-text');
     if (produkMurniText) {
-        produkMurniText.innerText = 'Rp ' + backendTotal.toLocaleString('id-ID');
+        produkMurniText.innerText = 'Rp ' + produkTotal.toLocaleString('id-ID');
     }
 
-    // 2. Update Biaya Wadah Val
-    const wadahValText = document.getElementById('biaya-wadah-val');
-    if (wadahValText) {
-        wadahValText.innerText = 'Rp ' + initialBiayaWadah.toLocaleString('id-ID');
-    }
-
-    // 3. Update Ongkir (Box & Total)
+    // Ongkir
     const ongkirBoxText = document.getElementById('ongkir-text-box');
     if (ongkirBoxText) {
         ongkirBoxText.innerText = 'Rp ' + ongkir.toLocaleString('id-ID');
@@ -1512,18 +1519,18 @@ function updateTotal() {
         ongkirTotalText.innerText = 'Rp ' + ongkir.toLocaleString('id-ID');
     }
 
-    // 4. Update Grand Total (Total Pesanan)
+    // Total Pesanan (Grand Total)
     const grandTotalEl = document.getElementById('grand-total-text');
     if (grandTotalEl) {
         grandTotalEl.innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
     }
 
-    // 5. Hitung DP atau Lunas
+    // Hitung DP atau Lunas
     const dpRadio = document.querySelector('input[name="jenis_pembayaran"]:checked');
     const dpSelected = dpRadio ? dpRadio.value === 'dp' : false;
     const totalBayarSekarang = dpSelected ? Math.floor(grandTotal / 2) : grandTotal;
 
-    // 6. Update Total Pembayaran Saat Ini
+    // Total Pembayaran Saat Ini
     const totalBayarSekarangEl = document.getElementById('total-text');
     if (totalBayarSekarangEl) {
         totalBayarSekarangEl.innerText = 'Rp ' + totalBayarSekarang.toLocaleString('id-ID');
