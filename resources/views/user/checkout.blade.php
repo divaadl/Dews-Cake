@@ -716,7 +716,10 @@
             <div style="background: var(--primary-soft); padding: 20px; border-radius: 20px; border: 1px solid var(--primary-border); margin-bottom: 25px; display: flex; gap: 15px; align-items: center;">
                 <i class="fa-solid fa-clock" style="font-size: 24px; color: var(--primary);"></i>
                 <p style="margin:0; font-size: 14px; color: var(--primary); font-weight: 500;">
-                    ⏰ Pesanan minimal dibuat <strong>H-3 sebelum tanggal pengambilan</strong> untuk memastikan kualitas terbaik.
+                    ⏰ Pesanan minimal dibuat <strong>H-3 sebelum tanggal pengambilan</strong>.<br>
+                    🕒 Jam Operasional Pengambilan:<br>
+                    • Senin - Jumat: <strong>08:00 - 20:00 WIB</strong><br>
+                    • Sabtu - Minggu: <strong>09:00 - 21:00 WIB</strong>
                 </p>
             </div>
             
@@ -725,11 +728,12 @@
                     <label>Pilih Tanggal</label>
                     <input type="date" id="tanggal_pengambilan" name="tanggal_pengambilan" 
                         min="{{ now('Asia/Jakarta')->addDays(3)->format('Y-m-d') }}"
+                        max="{{ now('Asia/Jakarta')->addMonths(3)->format('Y-m-d') }}"
                         value="{{ old('tanggal_pengambilan') }}" required>
                 </div>
                 <div>
                     <label>Pilih Jam</label>
-                    <input type="time" id="jam_pengambilan" name="jam_pengambilan" value="{{ old('jam_pengambilan') }}" required>
+                    <input type="time" id="jam_pengambilan" name="jam_pengambilan" value="{{ old('jam_pengambilan') }}" step="60" required>
                 </div>
             </div>
         </div>
@@ -1564,15 +1568,53 @@ submitBtn.addEventListener('click', function (e) {
     if (tglAmbil) {
         const selectedDate = new Date(tglAmbil);
         const today = new Date();
+        
+        // Min Date (H-3)
         const minDate = new Date(today);
         minDate.setDate(today.getDate() + 3);
         minDate.setHours(0, 0, 0, 0);
+        
+        // Max Date (3 Months)
+        const maxDate = new Date(today);
+        maxDate.setMonth(today.getMonth() + 3);
+        maxDate.setHours(0, 0, 0, 0);
+        
         selectedDate.setHours(0, 0, 0, 0);
 
         if (selectedDate < minDate) {
             e.preventDefault();
             alert('Pemesanan minimal H-3 sebelum tanggal pengambilan. Tanggal paling awal yang tersedia adalah ' + minDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }));
             return;
+        }
+
+        if (selectedDate > maxDate) {
+            e.preventDefault();
+            alert('Pemesanan maksimal 3 bulan dari tanggal sekarang. Tanggal paling akhir yang tersedia adalah ' + maxDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }));
+            return;
+        }
+
+        // Jam Pengambilan Validation
+        const jamAmbil = document.getElementById('jam_pengambilan').value;
+        if (jamAmbil) {
+            const day = selectedDate.getDay(); // 0: Sunday, 1-5: Mon-Fri, 6: Saturday
+            const [hour, minute] = jamAmbil.split(':').map(Number);
+            
+            let minH, maxH, scheduleText;
+            if (day === 0 || day === 6) { // Weekend
+                minH = 9;
+                maxH = 21;
+                scheduleText = "Sabtu - Minggu: 09:00 - 21:00";
+            } else { // Weekday
+                minH = 8;
+                maxH = 20;
+                scheduleText = "Senin - Jumat: 08:00 - 20:00";
+            }
+
+            if (hour < minH || hour > maxH || (hour === maxH && minute > 0)) {
+                e.preventDefault();
+                alert('Jam pengambilan tidak valid.\nJadwal Operasional:\n' + scheduleText);
+                return;
+            }
         }
     }
 

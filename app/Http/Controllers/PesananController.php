@@ -159,17 +159,49 @@ class PesananController extends Controller
         // kombinasikan tanggal dan jam
         $waktuPengambilan = $request->tanggal_pengambilan;
         
-        // VALIDASI H-3 PENGAMBILAN
+        // VALIDASI H-3 PENGAMBILAN & MAX 3 BULAN
         $minDate = now()->addDays(3)->startOfDay();
+        $maxDate = now()->addMonths(3)->endOfDay();
         if ($waktuPengambilan) {
             try {
                 $selectedDate = \Carbon\Carbon::parse($waktuPengambilan)->startOfDay();
                 if ($selectedDate->lt($minDate)) {
                     return back()->with('error', 'Pemesanan minimal H-3 sebelum tanggal pengambilan. Tanggal paling awal yang tersedia adalah ' . $minDate->translatedFormat('d F Y') . '.');
                 }
+                if ($selectedDate->gt($maxDate)) {
+                    return back()->with('error', 'Pemesanan maksimal 3 bulan dari sekarang. Tanggal paling akhir yang tersedia adalah ' . $maxDate->translatedFormat('d F Y') . '.');
+                }
             } catch (\Exception $e) {
                 // Ignore parse errors
             }
+        }
+
+        // VALIDASI JAM PENGAMBILAN
+        if ($waktuPengambilan && $request->jam_pengambilan) {
+            try {
+                $dt = \Carbon\Carbon::parse($waktuPengambilan);
+                $day = $dt->dayOfWeek; // 0 (Sun) - 6 (Sat)
+                $hour = (int) explode(':', $request->jam_pengambilan)[0];
+                $minute = (int) explode(':', $request->jam_pengambilan)[1];
+                
+                $isValid = true;
+                $limitMsg = "";
+                if ($day == 0 || $day == 6) { // Sabtu - Minggu
+                    if ($hour < 9 || $hour > 21 || ($hour == 21 && $minute > 0)) {
+                        $isValid = false;
+                        $limitMsg = "Sabtu - Minggu: 09:00 - 21:00";
+                    }
+                } else { // Senin - Jumat
+                    if ($hour < 8 || $hour > 20 || ($hour == 20 && $minute > 0)) {
+                        $isValid = false;
+                        $limitMsg = "Senin - Jumat: 08:00 - 20:00";
+                    }
+                }
+                
+                if (!$isValid) {
+                    return back()->with('error', 'Jam pengambilan tidak valid. Jadwal Operasional: ' . $limitMsg);
+                }
+            } catch (\Exception $e) {}
         }
 
         if ($request->has('jam_pengambilan') && $request->jam_pengambilan) {
@@ -415,8 +447,9 @@ class PesananController extends Controller
         $cart = session('cart', []);
         $checkout = session('checkout_data');
 
-        // VALIDASI H-3 PENGAMBILAN
+        // VALIDASI H-3 PENGAMBILAN & MAX 3 BULAN
         $minDate = now()->addDays(3)->startOfDay();
+        $maxDate = now()->addMonths(3)->endOfDay();
         $tglAmbilInput = $request->tanggal_pengambilan ?? (isset($checkout['tanggal_pengambilan']) ? explode(' ', $checkout['tanggal_pengambilan'])[0] : null);
         
         if ($tglAmbilInput) {
@@ -425,9 +458,41 @@ class PesananController extends Controller
                 if ($selectedDate->lt($minDate)) {
                     return back()->with('error', 'Pemesanan minimal H-3 sebelum tanggal pengambilan. Tanggal paling awal yang tersedia adalah ' . $minDate->translatedFormat('d F Y') . '.');
                 }
+                if ($selectedDate->gt($maxDate)) {
+                    return back()->with('error', 'Pemesanan maksimal 3 bulan dari sekarang. Tanggal paling akhir yang tersedia adalah ' . $maxDate->translatedFormat('d F Y') . '.');
+                }
             } catch (\Exception $e) {
                 // Ignore parse errors, will be caught by required validation or other logic
             }
+        }
+
+        // VALIDASI JAM PENGAMBILAN
+        $jamAmbilInput = $request->jam_pengambilan ?? (isset($checkout['tanggal_pengambilan']) ? explode(' ', $checkout['tanggal_pengambilan'])[1] : null);
+        if ($tglAmbilInput && $jamAmbilInput) {
+            try {
+                $dt = \Carbon\Carbon::parse($tglAmbilInput);
+                $day = $dt->dayOfWeek;
+                $hour = (int) explode(':', $jamAmbilInput)[0];
+                $minute = (int) explode(':', $jamAmbilInput)[1];
+                
+                $isValid = true;
+                $limitMsg = "";
+                if ($day == 0 || $day == 6) {
+                    if ($hour < 9 || $hour > 21 || ($hour == 21 && $minute > 0)) {
+                        $isValid = false;
+                        $limitMsg = "Sabtu - Minggu: 09:00 - 21:00";
+                    }
+                } else {
+                    if ($hour < 8 || $hour > 20 || ($hour == 20 && $minute > 0)) {
+                        $isValid = false;
+                        $limitMsg = "Senin - Jumat: 08:00 - 20:00";
+                    }
+                }
+                
+                if (!$isValid) {
+                    return back()->with('error', 'Jam pengambilan tidak valid. Jadwal Operasional: ' . $limitMsg);
+                }
+            } catch (\Exception $e) {}
         }
 
         // Jika cart kosong di session, coba parse dari cart_data (form submission langsung)
