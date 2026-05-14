@@ -114,6 +114,16 @@ class PaymentCallbackController extends Controller
                     // Update status pesanan menjadi batal
                     $pesanan->update(['status_pesanan' => 'batal']);
                     
+                    // Kirim Notifikasi WhatsApp
+                    $orderIdFormatted = '#ORD-' . str_pad($pesanan->pesanan_id, 5, '0', STR_PAD_LEFT);
+                    $waMessage = "*Pesanan Dibatalkan* ❌\n\n" .
+                                 "Halo *{$pesanan->user->name}*,\n" .
+                                 "Pesanan Anda *{$orderIdFormatted}* telah dibatalkan karena status pembayaran: *{$transactionStatus}*.\n\n" .
+                                 "Silakan lakukan pemesanan ulang jika Anda masih ingin memesan. Terima kasih.\n\n" .
+                                 "_Dews Cake_";
+                    
+                    $this->fonnteService->sendMessage($pesanan->phone_pesanan, $waMessage);
+                    
                     Log::info("Pesanan #{$pesanan->pesanan_id} dibatalkan otomatis karena status: {$transactionStatus}");
                 });
                 

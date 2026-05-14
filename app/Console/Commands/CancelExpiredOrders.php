@@ -24,7 +24,7 @@ class CancelExpiredOrders extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(\App\Services\FonnteService $fonnteService)
     {
         $now = now();
         $expiredTime = $now->copy()->subHours(24);
@@ -37,7 +37,7 @@ class CancelExpiredOrders extends Command
         Log::info('Batas Waktu Pelunasan (H-2 Pengambilan): ' . $hMinus2);
 
         // 1. Pesanan yang belum bayar DP/Lunas sama sekali dalam 24 jam
-        $unpaidOrders = \App\Models\Pesanan::where('status_pesanan', 'menunggu_pembayaran')
+        $unpaidOrders = \App\Models\Pesanan::with('user')->where('status_pesanan', 'menunggu_pembayaran')
             ->where('tanggal_pesan', '<', $expiredTime)
             ->whereDoesntHave('pembayaran', function ($query) {
                 $query->where('metode_pembayaran', 'cash');
@@ -45,7 +45,7 @@ class CancelExpiredOrders extends Command
             ->get();
 
         // 2. Pesanan DP yang belum lunas H-2 sebelum pengambilan
-        $unpaidDpOrders = \App\Models\Pesanan::where('status_pesanan', 'dp_dibayar')
+        $unpaidDpOrders = \App\Models\Pesanan::with('user')->where('status_pesanan', 'dp_dibayar')
             ->where('tanggal_pengambilan', '<=', $hMinus2)
             ->get();
 
@@ -58,8 +58,13 @@ class CancelExpiredOrders extends Command
             Log::info("Ditemukan {$count} pesanan yang berpotensi kadaluarsa.");
             
             foreach ($expiredOrders as $order) {
-                $reason = $order->status_pesanan == 'menunggu_pembayaran' ? 'Pembayaran awal > 24 jam' : 'Pelunasan DP > H-2 Pengambilan';
-                Log::info("Memproses Pesanan #{$order->pesanan_id} [{$reason}] (Dibuat: {$order->tanggal_pesan}, Ambil: {$order->tanggal_pengambilan})");
+                $isDpIssue = $order->status_pesanan == 'dp_dibayar';
+                $reasonText = $isDpIssue 
+                    ? "Melewati batas waktu pelunasan (H-2 sebelum pengambilan)" 
+                    : "Melewati batas waktu pembayaran awal (24 jam)";
+                
+                $reasonLog = $isDpIssue ? 'Pelunasan DP > H-2 Pengambilan' : 'Pembayaran awal > 24 jam';
+                Log::info("Memproses Pesanan #{$order->pesanan_id} [{$reasonLog}] (Dibuat: {$order->tanggal_pesan}, Ambil: {$order->tanggal_pengambilan})");
                 
                 try {
                     \DB::transaction(function () use ($order) {
@@ -74,6 +79,22 @@ class CancelExpiredOrders extends Command
                                 'status_pembayaran' => 'batal'
                             ]);
                     });
+
+                    // Kirim Notifikasi WhatsApp
+                    $orderIdFormatted = '#ORD-' . str_pad($order->pesanan_id, 5, '0', STR_PAD_LEFT);
+                    $waMessage = "*Pesanan Dibatalkan Otomatis* ❌\n\n" .
+                                 "Halo *{$order->user->name}*,\n" .
+                                 "Pesanan Anda *{$orderIdFormatted}* telah dibatalkan secara otomatis oleh sistem karena:\n" .
+                                 "_{$reasonText}_\n\n";
+                    
+                    if ($isDpIssue) {
+                        $waMessage .= "Sesuai ketentuan, DP yang telah dibayarkan tidak dapat dikembalikan (hangus). Terima kasih.\n";
+                    } else {
+                        $waMessage .= "Silakan lakukan pemesanan ulang jika Anda masih ingin memesan. Terima kasih.\n";
+                    }
+                    
+                    $waMessage .= "\n_Dews Cake_";
+                    $fonnteService->sendMessage($order->phone_pesanan, $waMessage);
 
                     Log::info("BERHASIL membatalkan pesanan #{$order->pesanan_id}.");
                     $successCount++;
