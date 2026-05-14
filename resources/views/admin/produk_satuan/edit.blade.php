@@ -180,8 +180,9 @@
 
             <div class="form-group">
                 <label>Harga</label>
-                <input type="number"
+                <input type="text"
                        name="harga"
+                       id="harga"
                        value="{{ $produk->harga }}"
                        required>
             </div>
@@ -238,6 +239,41 @@
 
     </div>
 </div>
+
+<script>
+    const hargaInput = document.getElementById('harga');
+
+    // Format on load
+    if (hargaInput.value) {
+        hargaInput.value = formatRupiah(hargaInput.value.replace(/[^0-9]/g, ''));
+    }
+
+    hargaInput.addEventListener('input', function(e) {
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value) {
+            this.value = formatRupiah(value);
+        } else {
+            this.value = '';
+        }
+    });
+
+    function formatRupiah(angka) {
+        let number_string = angka.toString(),
+            sisa = number_string.length % 3,
+            rupiah = number_string.substr(0, sisa),
+            ribuan = number_string.substr(sisa).match(/\d{3}/g);
+
+        if (ribuan) {
+            let separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+        return rupiah;
+    }
+
+    document.querySelector('form').addEventListener('submit', function() {
+        hargaInput.value = hargaInput.value.replace(/\./g, '');
+    });
+</script>
 
 </body>
 </html>

@@ -197,9 +197,9 @@
                 </label>
 
                 <input
-                    type="number"
+                    type="text"
                     name="biaya_wadah"
-                    min="0"
+                    id="biaya_wadah"
                     value="{{ old('biaya_wadah', $paket->biaya_wadah ?? 0) }}"
                     required
                 >
@@ -213,13 +213,13 @@
 
             <div class="form-group">
                 <label>Minimal Budget</label>
-                <input type="number" name="minimal_budget"
+                <input type="text" name="minimal_budget" id="minimal_budget"
                        value="{{ $paket->minimal_budget }}" required>
             </div>
 
             <div class="form-group">
                 <label>Maksimal Budget</label>
-                <input type="number" name="maksimal_budget"
+                <input type="text" name="maksimal_budget" id="maksimal_budget"
                        value="{{ $paket->maksimal_budget }}" required>
             </div>
 
@@ -294,6 +294,47 @@
 
     </div>
 </div>
+
+<script>
+    const priceFields = ['biaya_wadah', 'minimal_budget', 'maksimal_budget'];
+
+    priceFields.forEach(id => {
+        const input = document.getElementById(id);
+        if (!input) return;
+
+        // Format on load
+        if (input.value) {
+            input.value = formatRupiah(input.value.replace(/[^0-9]/g, ''));
+        }
+
+        input.addEventListener('input', function(e) {
+            let value = this.value.replace(/[^0-9]/g, '');
+            this.value = value ? formatRupiah(value) : '';
+        });
+    });
+
+    function formatRupiah(angka) {
+        let number_string = angka.toString(),
+            sisa = number_string.length % 3,
+            rupiah = number_string.substr(0, sisa),
+            ribuan = number_string.substr(sisa).match(/\d{3}/g);
+
+        if (ribuan) {
+            let separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+        return rupiah;
+    }
+
+    document.querySelector('form').addEventListener('submit', function() {
+        priceFields.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = input.value.replace(/\./g, '');
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
