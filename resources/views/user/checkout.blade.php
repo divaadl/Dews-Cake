@@ -1504,7 +1504,7 @@ function updateTotal() {
 
     // 1. Hitung Total Produk dari tabel (agar sinkron dengan apa yang dilihat user)
     let produkTotal = 0;
-    document.querySelectorAll('[id^="subtotal-"]').forEach(el => {
+    document.querySelectorAll('.row-isi-paket [id^="subtotal-"]').forEach(el => {
         const val = parseInt(el.innerText.replace(/[^0-9]/g, '')) || 0;
         produkTotal += val;
     });
