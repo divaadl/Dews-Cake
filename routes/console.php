@@ -10,4 +10,4 @@ Artisan::command('inspire', function () {
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('orders:cancel-expired')->hourly();
-Schedule::command('orders:remind-pelunasan')->dailyAt('09:00');
+Schedule::command('orders:remind-pelunasan')->dailyAt('10:30');
