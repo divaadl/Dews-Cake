@@ -33,8 +33,11 @@ class RemindPaymentPelunasan extends Command
      */
     public function handle()
     {
+        \Log::info('--- Menjalankan Task: Pengingat Pelunasan (09:00) ---');
+        
         // H-1 sebelum deadline H-2 = H-3 sebelum pengambilan
         $targetDate = now()->addDays(3)->format('Y-m-d');
+        \Log::info("Target tanggal pengambilan: {$targetDate}");
         
         $orders = \App\Models\Pesanan::with('user')
             ->where('status_pesanan', 'dp_dibayar')
@@ -42,7 +45,7 @@ class RemindPaymentPelunasan extends Command
             ->get();
 
         $count = $orders->count();
-        $this->info("Ditemukan {$count} pesanan untuk diingatkan.");
+        \Log::info("Ditemukan {$count} pesanan yang belum lunas untuk diingatkan.");
 
         foreach ($orders as $order) {
             $orderIdFormatted = '#ORD-' . str_pad($order->pesanan_id, 5, '0', STR_PAD_LEFT);
@@ -57,12 +60,19 @@ class RemindPaymentPelunasan extends Command
                        "⏳ Batas Pelunasan (H-2): *Besok ({$tglDeadline})*\n\n" .
                        "Mohon segera lakukan pelunasan agar pesanan dapat kami proses tepat waktu. Jika tidak dilunasi hingga besok, pesanan akan dibatalkan otomatis dan DP hangus sesuai ketentuan.\n\n" .
                        "Silakan cek menu *Pesanan Saya* di website untuk melakukan pelunasan online.\n\n" .
-                       "Terima kasih! 🙏\n_Dews Cake_";
+                       "Terika kasih! 🙏\n_Dews Cake_";
 
-            $this->fonnteService->sendMessage($order->phone_pesanan, $message);
-            $this->info("Sent reminder for {$orderIdFormatted}");
+            $response = $this->fonnteService->sendMessage($order->phone_pesanan, $message);
+            
+            if ($response['status']) {
+                \Log::info("Berhasil mengirim pengingat ke {$order->phone_pesanan} untuk pesanan {$orderIdFormatted}");
+                $this->info("Sent reminder for {$orderIdFormatted}");
+            } else {
+                \Log::error("Gagal mengirim pengingat ke {$order->phone_pesanan}: " . ($response['reason'] ?? 'Unknown Error'));
+            }
         }
 
+        \Log::info("Selesai menjalankan task pengingat pelunasan.");
         $this->info("Selesai mengirim {$count} pengingat.");
     }
 }
