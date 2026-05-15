@@ -49,7 +49,6 @@ Route::get('/cron', function (\Illuminate\Http\Request $request) {
 });
 
 /*USER (PUBLIC)*/
-use Illuminate\Support\Facades\Artisan;
 
 Route::get('/clear-cache', function() {
     try {
