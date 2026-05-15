@@ -807,15 +807,15 @@
         @if ($tab == 'paket')
             <div class="paket-info" style="display: flex; flex-direction: column; gap: 15px;">
                 <div>
-                    <h3 style="margin-bottom: 8px;">Paket Custom Sesuai Budget 🎉</h3>
-                    <p>Paket di <strong>Dew’s Cake</strong> bersifat <strong>custom sesuai budget</strong>🎂<br>
-                        Kamu cukup menentukan kisaran budget yang diinginkan, lalu sistem kami akan menampilkan
-                        <strong>rekomendasi pilihan kue</strong> dengan harga yang sesuai dengan budget tersebut.
-                    </p>
-                    <p style="margin-top:12px">👉 Selanjutnya, kamu bisa memilih kue berdasarkan <strong>rekomendasi yang diberikan</strong> atau <strong>memilih sendiri</strong> sesuai selera sebelum melanjutkan pemesanan. </p>
+                    <h3 style="margin-bottom: 8px;">Pesan Paket Lebih Mudah di Dew’s Cake 🎉</h3>
+                    <p>Kami menyediakan dua cara praktis untuk menyesuaikan pesanan dengan kebutuhanmu:</p>
+                    <ul style="margin: 10px 0; padding-left: 20px; list-style-type: none;">
+                        <li style="margin-bottom: 8px;">✨ <strong>Rekomendasi Pintar</strong>: Klik tombol di bawah jika kamu ingin sistem kami memberikan kombinasi kue terbaik secara otomatis sesuai total dana yang kamu miliki.</li>
+                        <li style="margin-bottom: 8px;">🛒 <strong>Pilih Sendiri</strong>: Langsung <strong>tambah jumlah paket (+)</strong> pada daftar di bawah untuk menentukan sendiri jenis kue favoritmu secara manual.</li>
+                    </ul>
                 </div>
                 
-                <div style="border-top: 1px dashed #fbcfe8; padding-top: 15px; margin-top: 5px;">
+                <div style="border-top: 1px dashed #fbcfe8; padding-top: 15px; margin-top: 5px; display: flex; justify-content: center;">
                     <button type="button" onclick="openBudgetSidebar()" class="btn-smart-budget" style="margin-left: 0; width: fit-content; padding: 12px 24px; font-size: 14px;">
                         <span>✨</span> Gunakan Rekomendasi Pintar Sekarang
                     </button>
