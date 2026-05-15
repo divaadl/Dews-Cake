@@ -912,6 +912,7 @@
                         <label style="display: block; font-size: 13px; font-weight: 600; color: #8b3f52; margin-bottom: 8px;">Pilih Kurir</label>
                         <select id="kurir" name="kurir" class="form-control" style="width: 100%; padding: 14px; border-radius: 16px; border: 1.5px solid #f3c2cd; background: #fff; appearance: none; cursor: pointer;">
                             <option value="">Pilih Kurir</option>
+                            <option value="kurir_toko">Kurir Toko (Lokal / Flat Rate)</option>
                             <option value="jne" {{ auth()->user()->preferred_courier == 'jne' ? 'selected' : '' }}>JNE (Reguler)</option>
                             <option value="pos" {{ auth()->user()->preferred_courier == 'pos' ? 'selected' : '' }}>POS Indonesia</option>
                             <option value="tiki" {{ auth()->user()->preferred_courier == 'tiki' ? 'selected' : '' }}>TIKI</option>
@@ -1303,7 +1304,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Call API Cek Ongkir
     function checkOngkir(destination, courier) {
-        
+        if (courier === 'kurir_toko') {
+            const flatRate = 25000; // Tarif Flat Lokal
+            ongkirInput.value = flatRate;
+            if (ongkirTextBox) ongkirTextBox.innerText = 'Rp ' + flatRate.toLocaleString('id-ID') + ' (Flat Rate Lokal)';
+            updateTotal();
+            return;
+        }
         // --- HITUNG BERAT DINAMIS ---
         let totalBerat = 0;
         const cartItems = @json($cart);
