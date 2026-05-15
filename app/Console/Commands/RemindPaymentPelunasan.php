@@ -33,7 +33,7 @@ class RemindPaymentPelunasan extends Command
      */
     public function handle()
     {
-        \Log::info('--- Menjalankan Task: Pengingat Pelunasan (10:30) ---');
+        \Log::info('--- Menjalankan Task: Pengingat Pelunasan (09:00) ---');
         
         // H-1 sebelum deadline H-2 = H-3 sebelum pengambilan
         $targetDate = now()->addDays(3)->format('Y-m-d');
