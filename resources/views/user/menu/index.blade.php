@@ -1492,12 +1492,20 @@
                 return;
             }
 
+            // RESET UI Rekomendasi jika tambah manual dari menu
+            const globalUI = document.getElementById("sidebar-global-recommendation");
+            const globalResults = document.getElementById("global-results");
+            if(globalUI) globalUI.style.display = "none";
+            if(globalResults) globalResults.style.display = "none";
+            
+            const modeInput = document.getElementById("input-mode-pesan-val");
+            if(modeInput) modeInput.value = 'manual';
+
             input.value = parseInt(input.value) + 1;
             if (input.dataset.type === 'paket') {
                 updatePaketExclusive(input);
                 toggleSidebarByPaket(input);
             }
-            const modeInput = document.getElementById("input-mode-pesan-val");
             if (modeInput && modeInput.value === 'manual') hitungUlangManual();
             updateCart();
         }
