@@ -212,6 +212,33 @@
             </div>
 
             <div class="form-group">
+                <label>Masa Simpan (Opsional)</label>
+                <div id="masa-simpan-container">
+                    <div class="ms-row" style="display: flex; gap: 10px; margin-bottom: 8px;">
+                        <input type="text" name="masa_simpan[]" placeholder="Contoh: 2–4 minggu dalam wadah tertutup rapat pada suhu ruang" style="flex: 1;">
+                    </div>
+                </div>
+                <button type="button" onclick="addMasaSimpan()" 
+                        style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 5px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; margin-top: 5px;">
+                    + Tambah Opsi Masa Simpan
+                </button>
+            </div>
+
+            <script>
+                function addMasaSimpan() {
+                    const container = document.getElementById('masa-simpan-container');
+                    const row = document.createElement('div');
+                    row.className = 'ms-row';
+                    row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 8px;';
+                    row.innerHTML = `
+                        <input type="text" name="masa_simpan[]" placeholder="Masukkan keterangan masa simpan..." style="flex: 1;">
+                        <button type="button" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 8px; padding: 0 10px; cursor: pointer;">&times;</button>
+                    `;
+                    container.appendChild(row);
+                }
+            </script>
+
+            <div class="form-group">
                 <label>Status Produk</label>
                 <select name="status" required>
                     <option value="aktif">Aktif</option>

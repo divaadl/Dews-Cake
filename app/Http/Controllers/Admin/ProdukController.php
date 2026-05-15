@@ -48,7 +48,8 @@ class ProdukController extends Controller
             'berat'        => $request->berat,
             'deskripsi'    => $request->deskripsi,
             'gambar'       => $namaGambar,
-            'status'       => $request->status
+            'status'       => $request->status,
+            'masa_simpan'  => $request->masa_simpan
         ]);
 
         return redirect('/admin/produk-satuan')
@@ -74,7 +75,8 @@ class ProdukController extends Controller
             'berat'       => $request->berat,
             'deskripsi'   => $request->deskripsi,
             'kategori_id' => $request->kategori_id,
-            'status'      => $request->status
+            'status'      => $request->status,
+            'masa_simpan' => $request->masa_simpan
         ];
 
         // 🔥 JIKA ADA GAMBAR BARU

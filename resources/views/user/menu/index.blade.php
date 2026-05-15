@@ -698,6 +698,49 @@
                                     <div class="produk-body">
                                         <h4>{{ $p->nama_produk }}</h4>
                                         <p>{{ $p->deskripsi }}</p>
+
+                                        @if($p->masa_simpan && is_array($p->masa_simpan) && count(array_filter($p->masa_simpan)) > 0)
+                                            <div class="masa-simpan-box" style="
+                                                background: #fdf2f8; 
+                                                border-radius: 10px; 
+                                                padding: 10px 12px; 
+                                                margin: 12px 0;
+                                                border-left: 3px solid #f472b6;
+                                            ">
+                                                <div style="
+                                                    display: flex; 
+                                                    align-items: center; 
+                                                    gap: 6px; 
+                                                    color: #be185d; 
+                                                    font-size: 11px; 
+                                                    font-weight: 700; 
+                                                    text-transform: uppercase; 
+                                                    letter-spacing: 0.5px;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                                    Masa Simpan
+                                                </div>
+                                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                    @foreach($p->masa_simpan as $ms)
+                                                        @if(!empty($ms))
+                                                            <div style="
+                                                                font-size: 12px; 
+                                                                color: #4b5563; 
+                                                                display: flex; 
+                                                                align-items: flex-start; 
+                                                                gap: 5px;
+                                                                line-height: 1.4;
+                                                            ">
+                                                                <span style="color: #f472b6; font-weight: bold;">•</span>
+                                                                <span>{{ $ms }}</span>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <div class="produk-footer">
                                             <div>
                                                 {{-- HARGA --}}

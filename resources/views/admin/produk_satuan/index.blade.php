@@ -176,6 +176,7 @@
                 <th>Kategori</th>
                 <th>Harga</th>
                 <th>Berat</th>
+                <th>Masa Simpan</th>
                 <th>Status</th>
                 <th>Aksi</th>
             </tr>
@@ -205,6 +206,21 @@
 
                 <td>Rp {{ number_format($item->harga) }}</td>
                 <td>{{ $item->berat }} gr</td>
+                <td>
+                    @if($item->masa_simpan && is_array($item->masa_simpan))
+                        <ul style="list-style: none; padding: 0; margin: 0; text-align: left; font-size: 14px;">
+                            @foreach($item->masa_simpan as $ms)
+                                @if(is_array($ms))
+                                    <li>• {{ $ms['tempat'] }}: {{ $ms['durasi'] }}</li>
+                                @elseif(!empty($ms))
+                                    <li>• {{ $ms }}</li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    @else
+                        -
+                    @endif
+                </td>
                 <td>
                     <form action="/admin/produk-satuan/{{ $item->produk_id }}/status" method="POST">
                         @csrf

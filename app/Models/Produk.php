@@ -17,7 +17,12 @@ class Produk extends Model
         'deskripsi',
         'gambar',
         'kategori_id',
-        'status'
+        'status',
+        'masa_simpan'
+    ];
+
+    protected $casts = [
+        'masa_simpan' => 'array'
     ];
 
     public function kategori()
