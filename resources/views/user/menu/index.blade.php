@@ -1563,6 +1563,15 @@
         });
 
         function goCheckout() { window.location.href = "{{ route('checkout') }}"; }
+
+        function formatRupiah(el) {
+            let val = el.value.replace(/\D/g, "");
+            if (val === "") {
+                el.value = "";
+                return;
+            }
+            el.value = new Intl.NumberFormat('id-ID').format(val);
+        }
         
         document.getElementById('global-tipe-paket')?.addEventListener('change', function() {
             const label = document.getElementById('label-jumlah-unit');
@@ -1579,7 +1588,8 @@
         /* GLOBAL RECOMMENDATION FUNCTIONS MOVED FROM SIDEBAR */
         function getGlobalRecommendation(e) {
             if (e) e.preventDefault();
-            const totalBudget = document.getElementById('global-total-budget').value;
+            const budgetRaw = document.getElementById('global-total-budget').value;
+            const totalBudget = budgetRaw.replace(/\D/g, ""); // Ambil angka saja
             const jumlahOrang = document.getElementById('global-jumlah-orang').value;
             const tipePaket = document.getElementById('global-tipe-paket').value;
 
