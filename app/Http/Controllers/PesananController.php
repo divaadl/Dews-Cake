@@ -313,9 +313,6 @@ class PesananController extends Controller
             ], 200);
         }
 
-
-
-
         // Hitung jumlah jenis
         if ($paket->jenis_paket == 'kotak') {
             $jumlahJenis = $paket->max_kue;
@@ -347,11 +344,12 @@ class PesananController extends Controller
                 $biayaWadahTotal = $kardusDibutuhkan * $paket->biaya_wadah;
                 $finalTotal = $currentTotal + $biayaWadahTotal;
 
-                if (
-                    $currentTotal <= $budget &&
-                    $currentTotal > $bestTotal
+                if ($finalTotal <= $budget 
+                    && $finalTotal <= $paket->maksimal_budget 
+                    && $finalTotal >= $paket->minimal_budget
+                    && $finalTotal > $bestTotal
                 ) {
-                    $bestTotal = $currentTotal;
+                    $bestTotal = $finalTotal; // Simpan TOTAL termasuk wadah
                     $bestCombination = $currentItems;
                 }
 
@@ -365,6 +363,7 @@ class PesananController extends Controller
 
                 $hargaTotalItem = $detail->produk->harga * $qtyPerJenis;
 
+                // Optimasi awal
                 if ($currentTotal + $hargaTotalItem > $budget)
                     continue;
 
@@ -376,6 +375,8 @@ class PesananController extends Controller
                     $newItems,
                     $currentTotal + $hargaTotalItem
                 );
+                
+                if ($bestTotal == $budget) return;
             }
         };
 
@@ -389,6 +390,10 @@ class PesananController extends Controller
             ], 200);
         }
 
+        // Hitung ulang biaya wadah untuk output
+        $kardusDibutuhkan = ceil(count($bestCombination) * $qtyPerJenis / max(1, $paket->max_kue));
+        $biayaWadahTotal = $kardusDibutuhkan * $paket->biaya_wadah;
+
         return response()->json([
             'items' => collect($bestCombination)->map(function ($p) use ($qtyPerJenis) {
                 return [
@@ -398,7 +403,114 @@ class PesananController extends Controller
                     'qty'   => $qtyPerJenis
                 ];
             }),
+            'total_harga_produk' => $bestTotal - $biayaWadahTotal,
+            'biaya_wadah' => $biayaWadahTotal,
             'total' => $bestTotal
+        ]);
+    }
+
+    public function rekomendasiGlobal(Request $request)
+    {
+        $totalBudget = (int) $request->total_budget;
+        $jumlahOrang = (int) $request->jumlah_orang;
+
+        if ($jumlahOrang <= 0) {
+            return response()->json(['error' => 'Jumlah orang harus lebih dari 0'], 400);
+        }
+
+        $budgetPerOrang = $totalBudget / $jumlahOrang;
+        
+        $pakets = Paket::where('status', 'aktif')->with('detail.produk')->get();
+        $recommendations = [];
+
+        foreach ($pakets as $paket) {
+            // Hitung jumlah jenis
+            if ($paket->jenis_paket == 'kotak') {
+                $jumlahJenis = $paket->max_kue;
+                $qtyPerJenis = 1;
+            } else {
+                $qtyPerJenis = $paket->qty_per_jenis;
+                $jumlahJenis = intval($paket->max_kue / $qtyPerJenis);
+            }
+
+            $produkList = $paket->detail->filter(function($d) { return $d->produk != null; })->values();
+            if ($produkList->count() < $jumlahJenis) continue;
+
+            // 🔥 VALIDASI AWAL: Jika budget user di bawah minimal paket, lewatkan paket ini
+            if ($budgetPerOrang < $paket->minimal_budget) continue;
+
+            // Target budget tidak boleh melebihi maksimal paket
+            $effectiveTargetBudget = min($budgetPerOrang, $paket->maksimal_budget);
+
+            $bestTotal = 0;
+            $bestCombination = [];
+
+            $findCombination = function ($start, $currentItems, $currentTotal) 
+                use (&$findCombination, $produkList, $budgetPerOrang, $effectiveTargetBudget, $paket, $jumlahJenis, $qtyPerJenis, &$bestTotal, &$bestCombination) 
+            {
+                if (count($currentItems) == $jumlahJenis) {
+                    $kardusDibutuhkan = ceil($jumlahJenis * $qtyPerJenis / max(1, $paket->max_kue));
+                    $biayaWadah = $kardusDibutuhkan * $paket->biaya_wadah;
+                    $totalFinal = $currentTotal + $biayaWadah;
+
+                    // 🔥 VALIDASI KETAT: Dalam range paket & dalam budget user
+                    if ($totalFinal <= $effectiveTargetBudget 
+                        && $totalFinal >= $paket->minimal_budget
+                        && $totalFinal > $bestTotal) 
+                    {
+                        $bestTotal = $totalFinal;
+                        $bestCombination = $currentItems;
+                    }
+                    return;
+                }
+
+                $limit = min($start + 15, $produkList->count()); 
+                for ($i = $start; $i < $limit; $i++) {
+                    $produk = $produkList[$i]->produk;
+                    $hargaItem = $produk->harga * $qtyPerJenis;
+                    
+                    // Optimasi awal: jika produk saja sudah lewat target, skip
+                    if ($currentTotal + $hargaItem > $effectiveTargetBudget) continue;
+
+                    $newItems = $currentItems;
+                    $newItems[] = [
+                        'id' => $produk->produk_id,
+                        'nama' => $produk->nama_produk,
+                        'harga' => $produk->harga,
+                        'qty' => $qtyPerJenis
+                    ];
+                    $findCombination($i + 1, $newItems, $currentTotal + $hargaItem);
+                    if ($bestTotal == $effectiveTargetBudget) return;
+                }
+            };
+
+            $findCombination(0, [], 0);
+
+            if (!empty($bestCombination)) {
+                $kardusDibutuhkan = ceil($jumlahJenis * $qtyPerJenis / max(1, $paket->max_kue));
+                $biayaWadah = $kardusDibutuhkan * $paket->biaya_wadah;
+                
+                // bestTotal sekarang sudah termasuk biayaWadah
+                $recommendations[] = [
+                    'paket_id' => $paket->paket_id,
+                    'nama_paket' => $paket->nama_paket,
+                    'isi_per_kotak' => $bestCombination,
+                    'jumlah_item' => count($bestCombination),
+                    'total_harga_produk' => $bestTotal - $biayaWadah,
+                    'biaya_wadah_satuan' => $biayaWadah,
+                    'total_estimasi_per_orang' => $bestTotal,
+                    'total_estimasi_keseluruhan' => $bestTotal * $jumlahOrang
+                ];
+            }
+        }
+
+        usort($recommendations, function($a, $b) {
+            return $b['total_estimasi_per_orang'] <=> $a['total_estimasi_per_orang'];
+        });
+
+        return response()->json([
+            'budget_per_orang' => $budgetPerOrang,
+            'recommendations' => array_slice($recommendations, 0, 5)
         ]);
     }
 

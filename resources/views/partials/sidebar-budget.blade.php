@@ -409,6 +409,31 @@
     box-shadow: 0 8px 18px rgba(236,72,153,0.25);
 }
 
+.close-sidebar {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #f3f4f6;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b5563;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.close-sidebar:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
 .btn-lanjut:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 22px rgba(236,72,153,0.35);
@@ -423,14 +448,41 @@
 </style>
 <div id="budget-sidebar" class="budget-sidebar">
 
-    <div class="sidebar-header">
+    <div class="sidebar-header" style="position: relative;">
         <div class="sheet-handle"></div>
         <div class="sidebar-header-content">
             <h3>🎂 Atur Budget Paket</h3>
+            <button type="button" class="close-sidebar" onclick="closeSidebar()" aria-label="Close sidebar">&times;</button>
         </div>
     </div>
 
     <div class="sidebar-body">
+
+    <!-- REKOMENDASI PINTAR (GLOBAL) -->
+    <div id="sidebar-global-recommendation" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed #fbcfe8;">
+        <h4 style="font-size: 15px; color: #be185d; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <span>✨</span> Rekomendasi Pintar
+        </h4>
+        <div style="background: #fff5f7; padding: 16px; border-radius: 16px; border: 1px solid #fce7f3;">
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; display: block;">Total Dana (Rp)</label>
+                <input type="number" id="global-total-budget" class="sidebar-input" placeholder="Contoh: 500000" style="margin-bottom: 0;">
+            </div>
+            <div style="margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; display: block;">Jumlah Orang</label>
+                <input type="number" id="global-jumlah-orang" class="sidebar-input" placeholder="Contoh: 20" style="margin-bottom: 0;">
+            </div>
+            <button type="button" class="btn-sidebar" onclick="getGlobalRecommendation(event)" style="background: linear-gradient(90deg, #be185d, #db2777);">
+                Cari Paket Sesuai Dana
+            </button>
+        </div>
+
+        <!-- HASIL REKOMENDASI GLOBAL -->
+        <div id="global-results" style="display: none; margin-top: 16px;">
+            <p style="font-size: 12px; font-weight: 600; color: #be185d; margin-bottom: 10px;">Pilih Salah Satu Rekomendasi:</p>
+            <div id="global-recommendations-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+    </div>
 
     <div id="sidebar-paket-info">
         <p style="color:#9ca3af;font-size:14px">
@@ -441,69 +493,43 @@
     <div id="sidebar-budget-form" style="display:none">
 
         <p id="sidebar-paket-nama"
-           style="font-weight:600;color:#be185d;margin-bottom:6px">
+           style="font-weight:600;color:#be185d;margin-bottom:2px">
         </p>
 
-        <p style="font-size:13px;color:#6b7280;margin-bottom:12px">
-            Budget:
-            <b>Rp <span id="budget-min"></span></b>
-            –
-            <b>Rp <span id="budget-max"></span></b>
+        <p style="font-size:12px;color:#6b7280;margin-bottom:12px">
+            Kisaran: 
+            <span style="font-weight:700; color:#4b5563">Rp <span id="budget-min"></span> – Rp <span id="budget-max"></span></span>
         </p>
 
-        <label style="font-size:13px;font-weight:600">
-            Masukkan Budget
-        </label>
-
-        <input type="number"
-               id="sidebar-budget-input"
-               class="sidebar-input">
-
-        <button type="button" class="btn-sidebar" onclick="submitBudget()">
-            Lihat Rekomendasi
-        </button>
+        <input type="hidden" id="sidebar-budget-input">
 
         <div id="info-rekomendasi"
             style="display:none;
-                    margin-top:12px;
-                    padding:10px;
+                    margin-top:5px;
+                    padding:8px;
                     background:#fff7ed;
                     border:1px solid #fed7aa;
                     border-radius:8px;
-                    font-size:13px;
+                    font-size:11px;
                     color:#92400e;">
-            ℹ️ Budget yang kamu masukkan belum dapat dikombinasikan
-            dengan paket ini.
-            Coba sesuaikan budget atau jumlah paket.
         </div>
+
 
         <!-- HASIL REKOMENDASI -->
         <div id="hasil-rekomendasi" style="display:none;margin-top:15px">
-            <h4 style="font-size:14px">🎁 Rekomendasi Paket</h4>
+            <div id="list-rekomendasi"></div>
 
-            <ul id="list-rekomendasi" style="font-size:13px;padding-left:0"></ul>
-
-            <div style="margin-top:10px">
-                <label>
-                    <input type="radio" name="mode_pesan" value="rekomendasi" checked>
-                    Gunakan rekomendasi
-                </label><br>
-
-                <label>
-                    <input type="radio" name="mode_pesan" value="manual">
-                    Pilih sendiri
-                </label>
-            </div>
+            <input type="hidden" name="mode_pesan" id="input-mode-pesan-val" value="rekomendasi">
 
             <!-- MANUAL PRODUK -->
-            <div class="card" id="manual-produk-card" style="display:none;margin-top:12px">
+            <div class="card" id="manual-produk-card" style="margin-top:12px">
                 <h4 style="font-size:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
                     <span>🧁 Pilih Produk Manual</span>
                     <span id="manual-count" style="font-size:12px;color:#be185d;font-weight:700"></span>
                 </h4>
 
                 <div class="produk-grid" id="manual-produk-list">
-
+                    <!-- Dinamis via JS -->
                 </div>
             </div>
 
@@ -584,9 +610,3 @@
     </div>
 
 </div>
-
-@push('script')
-<script>
-    // Sidebar close button removed per user request
-</script>
-@endpush

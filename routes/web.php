@@ -104,6 +104,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/paket/rekomendasi', [PesananController::class, 'rekomendasi'])->name('paket.rekomendasi');
     Route::post('/rekomendasi-paket', [PesananController::class, 'rekomendasi'])->name('rekomendasi.paket');
     Route::post('/paket/rekomendasi/ajax', [App\Http\Controllers\PesananController::class, 'rekomendasiAjax'])->name('paket.rekomendasi.ajax');
+    Route::post('/paket/rekomendasi-global', [App\Http\Controllers\PesananController::class, 'rekomendasiGlobal'])->name('rekomendasi.global');
     Route::get('/lanjutkan', [PesananController::class, 'lanjutkan'])->name('pesanan.lanjut');
     Route::post('/konfirmasi', [PesananController::class, 'konfirmasi'])->name('pesanan.konfirmasi');
     Route::put('/pesanan/{id}/update-metode',[PesananController::class, 'updateMetode'])->name('pesanan.updateMetode');
