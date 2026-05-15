@@ -419,8 +419,15 @@ class PesananController extends Controller
         }
 
         $budgetPerOrang = $totalBudget / $jumlahOrang;
+        $tipe = $request->tipe; // 'kotak' atau 'nampan'
         
-        $pakets = Paket::where('status', 'aktif')->with('detail.produk')->get();
+        $pakets = Paket::where('status', 'aktif')
+            ->when($tipe, function($q) use ($tipe) {
+                return $q->where('jenis_paket', $tipe);
+            })
+            ->with('detail.produk')
+            ->orderBy('paket_id', 'asc')
+            ->get();
         $recommendations = [];
 
         foreach ($pakets as $paket) {
@@ -433,7 +440,9 @@ class PesananController extends Controller
                 $jumlahJenis = intval($paket->max_kue / $qtyPerJenis);
             }
 
-            $produkList = $paket->detail->filter(function($d) { return $d->produk != null; })->values();
+            $produkList = $paket->detail->filter(function($d) { return $d->produk != null; })
+                ->sortBy('produk.produk_id')
+                ->values();
             if ($produkList->count() < $jumlahJenis) continue;
 
             // 🔥 VALIDASI AWAL: Jika budget user di bawah minimal paket, lewatkan paket ini
@@ -505,6 +514,9 @@ class PesananController extends Controller
         }
 
         usort($recommendations, function($a, $b) {
+            if ($a['total_estimasi_per_orang'] == $b['total_estimasi_per_orang']) {
+                return $a['paket_id'] <=> $b['paket_id'];
+            }
             return $b['total_estimasi_per_orang'] <=> $a['total_estimasi_per_orang'];
         });
 

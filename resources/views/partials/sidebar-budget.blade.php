@@ -459,17 +459,24 @@
     <div class="sidebar-body">
 
     <!-- REKOMENDASI PINTAR (GLOBAL) -->
-    <div id="sidebar-global-recommendation" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed #fbcfe8;">
+    <div id="sidebar-global-recommendation" style="display: none; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed #fbcfe8;">
         <h4 style="font-size: 15px; color: #be185d; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
             <span>✨</span> Rekomendasi Pintar
         </h4>
         <div style="background: #fff5f7; padding: 16px; border-radius: 16px; border: 1px solid #fce7f3;">
             <div style="margin-bottom: 12px;">
+                <label style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; display: block;">Tipe Pesanan</label>
+                <select id="global-tipe-paket" class="sidebar-input" style="margin-bottom: 0; width: 100%; border: 1px solid #fbcfe8; background: white; border-radius: 12px; padding: 10px; font-size: 13px; color: #374151; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23be185d%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right%2012px%20top%2050%25; background-size: 10px%20auto;">
+                    <option value="kotak">Snack Box (Paket)</option>
+                    <option value="nampan">Nampan (Tray)</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 12px;">
                 <label style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; display: block;">Total Dana (Rp)</label>
                 <input type="number" id="global-total-budget" class="sidebar-input" placeholder="Contoh: 500000" style="margin-bottom: 0;">
             </div>
             <div style="margin-bottom: 16px;">
-                <label style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; display: block;">Jumlah Orang</label>
+                <label id="label-jumlah-unit" style="font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; display: block;">Jumlah Orang</label>
                 <input type="number" id="global-jumlah-orang" class="sidebar-input" placeholder="Contoh: 20" style="margin-bottom: 0;">
             </div>
             <button type="button" class="btn-sidebar" onclick="getGlobalRecommendation(event)" style="background: linear-gradient(90deg, #be185d, #db2777);">

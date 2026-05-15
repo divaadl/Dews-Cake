@@ -939,19 +939,66 @@
             const mode = modeInput ? modeInput.value : 'manual';
             const totalText = document.getElementById("total-pesanan")?.innerText || "0";
             const total = parseInt(totalText.replace(/\D/g, '')) || 0;
+            const statusBadge = document.getElementById("status-budget");
 
-            const isManualValid = () => {
-                if (!paketAktif) return false;
-                const checked = document.querySelectorAll(".produk-checkbox:checked");
-                const qtyPerJenis = paketAktif.jenis_paket === "kotak" ? 1 : paketAktif.qty_per_jenis;
-                const maxKueTotal = paketAktif.max_kue * paketAktif.qty;
-                const totalPcs = checked.length * qtyPerJenis * paketAktif.qty;
-                return totalPcs === maxKueTotal;
-            };
+            let isBudgetValid = false;
+            let isKueLengkap = false;
 
-            const isValid = (mode === 'manual') ? isManualValid() : (total > 0);
+            if (mode === 'manual') {
+                if (paketAktif) {
+                    const checked = document.querySelectorAll(".produk-checkbox:checked");
+                    const qtyPerJenis = paketAktif.jenis_paket === "kotak" ? 1 : paketAktif.qty_per_jenis;
+                    const maxKueTotal = paketAktif.max_kue * paketAktif.qty;
+                    const totalPcs = checked.length * qtyPerJenis * paketAktif.qty;
+                    
+                    const totalPerOrang = total / paketAktif.qty;
+                    isKueLengkap = (totalPcs === maxKueTotal);
+                    isBudgetValid = (totalPerOrang >= paketAktif.min && totalPerOrang <= paketAktif.max);
+                }
+            } else {
+                // Mode rekomendasi dianggap valid jika total > 0 karena sudah dihitung server
+                isBudgetValid = (total > 0);
+                isKueLengkap = (total > 0);
+            }
 
-            if (mode && isValid) {
+            if (statusBadge) {
+                if (total > 0 && mode === 'manual') {
+                    const totalPerOrang = total / (paketAktif ? paketAktif.qty : 1);
+                    if (totalPerOrang < paketAktif?.min) {
+                        statusBadge.innerText = "❌ Budget Kurang";
+                        statusBadge.className = "total-badge warning";
+                        statusBadge.style.background = "#fee2e2";
+                        statusBadge.style.color = "#ef4444";
+                    } else if (totalPerOrang > paketAktif?.max) {
+                        statusBadge.innerText = "❌ Melebihi Budget";
+                        statusBadge.className = "total-badge warning";
+                        statusBadge.style.background = "#fee2e2";
+                        statusBadge.style.color = "#ef4444";
+                    } else if (isBudgetValid && isKueLengkap) {
+                        statusBadge.innerText = "✔ Dalam Budget";
+                        statusBadge.className = "total-badge success";
+                        statusBadge.style.background = "#dcfce7";
+                        statusBadge.style.color = "#166534";
+                    } else {
+                        statusBadge.innerText = "⏳ Belum Lengkap";
+                        statusBadge.className = "total-badge warning";
+                        statusBadge.style.background = "#fff7ed";
+                        statusBadge.style.color = "#92400e";
+                    }
+                } else if (total > 0 && mode === 'rekomendasi') {
+                    statusBadge.innerText = "✔ Dalam Budget";
+                    statusBadge.className = "total-badge success";
+                    statusBadge.style.background = "#dcfce7";
+                    statusBadge.style.color = "#166534";
+                } else {
+                    statusBadge.innerText = "⏳ Belum Lengkap";
+                    statusBadge.className = "total-badge warning";
+                    statusBadge.style.background = "#fff7ed";
+                    statusBadge.style.color = "#92400e";
+                }
+            }
+
+            if (mode && isBudgetValid && isKueLengkap) {
                 btn.disabled = false;
                 
                 const inputMode = document.getElementById("input-mode-pesan");
@@ -966,8 +1013,6 @@
                 const inputCart = document.getElementById("input-cart-data");
                 if(inputCart) inputCart.value = JSON.stringify(buildCartData());
                 
-            } else if (paketAktif) {
-                btn.disabled = false; 
             } else {
                 btn.disabled = true;
             }
@@ -978,14 +1023,16 @@
             if (sidebar) {
                 sidebar.classList.add('active');
                 document.body.classList.add('sidebar-open');
-                if (!paketAktif) {
-                    const infoPaket = document.getElementById('sidebar-paket-info');
-                    if(infoPaket) infoPaket.style.display = "block";
-                    const budgetForm = document.getElementById('sidebar-budget-form');
-                    if(budgetForm) budgetForm.style.display = 'none';
-                    const globalUI = document.getElementById('sidebar-global-recommendation');
-                    if(globalUI) globalUI.style.display = 'block';
-                }
+                
+                const globalUI = document.getElementById("sidebar-global-recommendation");
+                const infoPaket = document.getElementById('sidebar-paket-info');
+                const budgetForm = document.getElementById('sidebar-budget-form');
+                const triggerBtn = document.getElementById("btn-trigger-recommendation-wrapper");
+
+                if (globalUI) globalUI.style.display = "block";
+                if (infoPaket) infoPaket.style.display = "none";
+                if (budgetForm) budgetForm.style.display = "none";
+                if (triggerBtn) triggerBtn.style.display = "none";
             }
         }
 
@@ -1034,6 +1081,8 @@
             const infoPaket = document.getElementById('sidebar-paket-info');
 
             if (qty > 0) {
+                const isSamePaket = (paketAktif && paketAktif.id === wrapper.dataset.id);
+                
                 paketAktif = {
                     id: wrapper.dataset.id,
                     nama: wrapper.dataset.nama,
@@ -1048,6 +1097,7 @@
                     harga_manual: 0,
                     harga_rekomendasi: 0
                 };
+
                 lockOtherPaket(paketAktif.id);
                 if(infoPaket) infoPaket.style.display = "none";
 
@@ -1072,25 +1122,43 @@
                 const hasilBox = document.getElementById("hasil-rekomendasi");
                 const modeInput = document.getElementById("input-mode-pesan-val");
                 const globalUI = document.getElementById("sidebar-global-recommendation");
+                const triggerBtn = document.getElementById("btn-trigger-recommendation-wrapper");
 
-                if (hasilBox) hasilBox.style.display = "none";
-                if (globalUI) globalUI.style.display = "none";
-                if (modeInput) modeInput.value = 'manual';
+                if (hasilBox) hasilBox.style.display = "block";
+                
+                // Jangan sembunyikan globalUI jika kita sedang melihat hasil rekomendasi
+                const globalResults = document.getElementById("global-results");
+                const isShowingResults = globalResults && globalResults.style.display === "block";
+                
+                if (globalUI && !isShowingResults) {
+                    globalUI.style.display = "none";
+                } else if (globalUI) {
+                    globalUI.style.display = "block";
+                }
+
+                if (triggerBtn) triggerBtn.style.display = "none"; 
+                if (modeInput && !isSamePaket && !isShowingResults) modeInput.value = 'manual';
 
                 if (manualCard && manualList) {
                     manualCard.style.display = "block";
-                    manualList.innerHTML = "";
-                    const details = Array.isArray(paketAktif.detail) ? paketAktif.detail : Object.values(paketAktif.detail);
-                    details.forEach(item => {
-                        if (!item.produk) return;
-                        manualList.innerHTML += `
-                            <label style="display:block;margin-bottom:6px; cursor:pointer;">
-                                <input type="checkbox" class="produk-checkbox" value="${item.produk.produk_id}" data-nama="${item.produk.nama_produk}" data-harga="${item.produk.harga}">
-                                <span style="font-size: 13px;">${item.produk.nama_produk}</span>
-                                <small style="color:#6b7280">(Rp ${Number(item.produk.harga).toLocaleString('id-ID')})</small>
-                            </label>
-                        `;
-                    });
+                    // Hanya re-render daftar produk jika ganti paket
+                    if (!isSamePaket) {
+                        manualList.innerHTML = "";
+                        const details = Array.isArray(paketAktif.detail) ? paketAktif.detail : Object.values(paketAktif.detail);
+                        details.forEach(item => {
+                            if (!item.produk) return;
+                            manualList.innerHTML += `
+                                <label style="display:block;margin-bottom:6px; cursor:pointer;">
+                                    <input type="checkbox" class="produk-checkbox" value="${item.produk.produk_id}" data-nama="${item.produk.nama_produk}" data-harga="${item.produk.harga}">
+                                    <span style="font-size: 13px;">${item.produk.nama_produk}</span>
+                                    <small style="color:#6b7280">(Rp ${Number(item.produk.harga).toLocaleString('id-ID')})</small>
+                                </label>
+                            `;
+                        });
+                    } else if (modeInput && modeInput.value === 'manual') {
+                        // Jika paket sama tapi qty berubah, trigger update rincian pesanan
+                        refreshManualSummary();
+                    }
                 }
                 sidebar.classList.add('active');
                 document.body.classList.add('sidebar-open');
@@ -1132,34 +1200,26 @@
             toggleCheckoutButton();
         }
 
-        document.addEventListener("change", function(e) {
-            if (!e.target.classList.contains("produk-checkbox")) return;
+        function refreshManualSummary() {
             if (!paketAktif) return;
-
-            const modeInput = document.getElementById("input-mode-pesan-val");
-            if(modeInput) modeInput.value = 'manual';
-            budgetSudahDipilih = true; 
-            
             const checked = document.querySelectorAll(".produk-checkbox:checked");
             const qtyPerJenis = paketAktif.jenis_paket === "kotak" ? 1 : paketAktif.qty_per_jenis;
             const maxKueTotal = paketAktif.max_kue * paketAktif.qty;
             const totalPcs = checked.length * qtyPerJenis * paketAktif.qty;
             const infoKombinasi = document.getElementById("info-kombinasi");
+            const listPesanan = document.getElementById("list-pesanan");
+            const totalEl = document.getElementById("total-pesanan");
+            const pesananBox = document.getElementById("pesanan-saya");
 
             if (totalPcs > maxKueTotal) {
                 if(infoKombinasi) {
                     infoKombinasi.innerHTML = `ℹ️ Total kue tidak boleh lebih dari <strong>${maxKueTotal} pcs</strong>.`;
                     infoKombinasi.style.display = "block";
                 }
-                e.target.checked = false;
-                return;
+                return false; 
             } else {
                 if(infoKombinasi) infoKombinasi.style.display = "none";
             }
-
-            const listPesanan = document.getElementById("list-pesanan");
-            const totalEl = document.getElementById("total-pesanan");
-            const pesananBox = document.getElementById("pesanan-saya");
 
             if(listPesanan) {
                 listPesanan.innerHTML = "";
@@ -1187,6 +1247,20 @@
                 updateManualCount();
                 toggleCheckoutButton();
                 if(pesananBox) pesananBox.style.display = checked.length > 0 ? "block" : "none";
+            }
+            return true;
+        }
+
+        document.addEventListener("change", function(e) {
+            if (!e.target.classList.contains("produk-checkbox")) return;
+            if (!paketAktif) return;
+
+            const modeInput = document.getElementById("input-mode-pesan-val");
+            if(modeInput) modeInput.value = 'manual';
+            budgetSudahDipilih = true; 
+            
+            if (!refreshManualSummary()) {
+                e.target.checked = false;
             }
         });
 
@@ -1489,12 +1563,25 @@
         });
 
         function goCheckout() { window.location.href = "{{ route('checkout') }}"; }
+        
+        document.getElementById('global-tipe-paket')?.addEventListener('change', function() {
+            const label = document.getElementById('label-jumlah-unit');
+            const input = document.getElementById('global-jumlah-orang');
+            if (this.value === 'nampan') {
+                if(label) label.innerText = 'Jumlah Nampan';
+                if(input) input.placeholder = 'Contoh: 5';
+            } else {
+                if(label) label.innerText = 'Jumlah Orang';
+                if(input) input.placeholder = 'Contoh: 20';
+            }
+        });
 
         /* GLOBAL RECOMMENDATION FUNCTIONS MOVED FROM SIDEBAR */
         function getGlobalRecommendation(e) {
             if (e) e.preventDefault();
             const totalBudget = document.getElementById('global-total-budget').value;
             const jumlahOrang = document.getElementById('global-jumlah-orang').value;
+            const tipePaket = document.getElementById('global-tipe-paket').value;
 
             if (!totalBudget || !jumlahOrang) {
                 alert('Harap isi total dana dan jumlah orang');
@@ -1514,7 +1601,8 @@
                 },
                 body: JSON.stringify({
                     total_budget: totalBudget,
-                    jumlah_orang: jumlahOrang
+                    jumlah_orang: jumlahOrang,
+                    tipe: tipePaket
                 })
             })
             .then(res => res.json())
@@ -1616,6 +1704,21 @@
                     pesananBox.style.boxShadow = '';
                 }, 2000);
             }
+        }
+        function showSmartRecommendation() {
+            const globalUI = document.getElementById("sidebar-global-recommendation");
+            const triggerBtn = document.getElementById("btn-trigger-recommendation-wrapper");
+            const manualCard = document.getElementById("manual-produk-card");
+            const modeInput = document.getElementById("input-mode-pesan-val");
+
+            if (globalUI) globalUI.style.display = "block";
+            if (triggerBtn) triggerBtn.style.display = "none";
+            if (manualCard) manualCard.style.display = "none";
+            if (modeInput) modeInput.value = 'rekomendasi';
+            
+            // Scroll to top of sidebar to see the form
+            const sidebar = document.getElementById('budget-sidebar');
+            if(sidebar) sidebar.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
     @endpush
