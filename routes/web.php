@@ -49,6 +49,28 @@ Route::get('/cron', function (\Illuminate\Http\Request $request) {
 });
 
 /*USER (PUBLIC)*/
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/clear-cache', function() {
+    try {
+        Artisan::call('route:clear');
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        return "Cache berhasil dibersihkan!";
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
+
+Route::get('/run-reminder-test', function() {
+    try {
+        Artisan::call('orders:remind-pelunasan');
+        return "Pengingat dijalankan. Hasil: <br><pre>" . Artisan::output() . "</pre>";
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
+
 Route::get('/', function () {
     return view('user.beranda');
 })->name('beranda');
