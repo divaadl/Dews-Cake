@@ -686,7 +686,8 @@ class PesananController extends Controller
             if ($pembayaran->jenis_pembayaran == 'dp') {
                 if ($isH3) {
                     $expirationWarning = "\n\n*Detail Jadwal:*\n📅 Tgl Pengambilan: *{$tglAmbil}*\n\n*⚠️ PENTING (Pesanan Mepet):*\n" .
-                                       "Karena pemesanan dilakukan dalam waktu yang mepet (H-3), maka *pelunasan wajib dilakukan segera* setelah pembayaran DP untuk memastikan proses produksi dapat berjalan. Jika tidak dilunasi tepat waktu, pesanan akan dibatalkan otomatis dan DP hangus.";
+                                       "• Pembayaran DP wajib dilakukan maksimal *24 jam* setelah pemesanan.\n" .
+                                       "• Karena waktu mepet (H-3), maka *pelunasan wajib dilakukan segera* setelah pembayaran DP untuk memastikan proses produksi dapat berjalan. Jika tidak dilunasi tepat waktu, pesanan akan dibatalkan otomatis dan DP hangus.";
                 } else {
                     $expirationWarning = "\n\n*Detail Jadwal:*\n📅 Tgl Pengambilan: *{$tglAmbil}*\n⏳ Batas Pelunasan (H-2): *{$tglDeadline}*\n\n*Ketentuan Pembayaran DP:*\n" .
                                        "• Pembayaran DP wajib dilakukan maksimal 24 jam setelah pemesanan.\n" .
