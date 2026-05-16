@@ -15,8 +15,8 @@ use App\Http\Controllers\PaymentCallbackController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 
-Route::get('/cron', function (\Illuminate\Http\Request $request) {
-    Log::info('Cron Attempt - IP: ' . $request->ip() . ' - Params: ' . json_encode($request->all()));
+Route::get('/cron/cancel-expired', function (\Illuminate\Http\Request $request) {
+    Log::info('Cron Attempt Cancel Expired - IP: ' . $request->ip() . ' - Params: ' . json_encode($request->all()));
 
     if ($request->key !== 'DewsCakeSecret2024') {
         Log::warning('Unauthorized Cron Attempt from IP: ' . $request->ip());
@@ -26,28 +26,44 @@ Route::get('/cron', function (\Illuminate\Http\Request $request) {
         ], 403);
     }
     
-    Log::info('External Cron Triggered - Beginning Schedule Execution');
+    Log::info('Executing orders:cancel-expired directly via HTTP...');
     
     try {
-        if ($request->command === 'cancel') {
-            Log::info('Executing orders:cancel-expired directly via HTTP...');
-            Artisan::call('orders:cancel-expired');
-            $output = Artisan::output();
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Direct command executed.',
-                'output' => $output
-            ]);
-        }
-
-        Log::info('Executing schedule:run via HTTP...');
-        Artisan::call('schedule:run');
+        Artisan::call('orders:cancel-expired');
         $output = Artisan::output();
-        Log::info('Schedule Output: ' . $output);
-        
         return response()->json([
             'status' => 'success',
-            'message' => 'Schedule successfully executed.',
+            'message' => 'Direct command executed.',
+            'output' => $output
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Cron Execution Error: ' . $e->getMessage());
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
+Route::get('/cron/order-reminder', function (\Illuminate\Http\Request $request) {
+    Log::info('Cron Attempt Order Reminder - IP: ' . $request->ip() . ' - Params: ' . json_encode($request->all()));
+
+    if ($request->key !== 'DewsCakeSecret2024') {
+        Log::warning('Unauthorized Cron Attempt from IP: ' . $request->ip());
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Unauthorized key.'
+        ], 403);
+    }
+    
+    Log::info('Executing orders:remind-pelunasan directly via HTTP...');
+    
+    try {
+        Artisan::call('orders:remind-pelunasan');
+        $output = Artisan::output();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Direct command executed.',
             'output' => $output
         ]);
     } catch (\Exception $e) {
@@ -67,15 +83,6 @@ Route::get('/clear-cache', function() {
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
         return "Cache berhasil dibersihkan!";
-    } catch (\Exception $e) {
-        return "Error: " . $e->getMessage();
-    }
-});
-
-Route::get('/run-reminder-test', function() {
-    try {
-        Artisan::call('orders:remind-pelunasan');
-        return "Pengingat dijalankan. Hasil: <br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
         return "Error: " . $e->getMessage();
     }
